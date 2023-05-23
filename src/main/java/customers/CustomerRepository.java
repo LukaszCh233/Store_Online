@@ -2,7 +2,6 @@ package customers;
 
 import database.Database;
 import products.Order;
-
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -43,7 +42,7 @@ public class CustomerRepository {
         }
     }
 
-    public void saveCustomerToDatabase(Customer customer, String password) {
+    public void saveCustomerToDatabase(Customer customer) {
         String sql = "INSERT INTO Customers (name,lastName,email,number,address) VALUES (?,?,?,?,?)";
         try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
             preparedStatement.setString(1, customer.name);
@@ -57,7 +56,7 @@ public class CustomerRepository {
         }
         String query = "INSERT INTO Customers_password (password, email) VALUES ( ?, ?)";
         try (PreparedStatement statement = database.getConnection().prepareStatement(query)) {
-            statement.setString(1, password);
+            statement.setString(1, customer.password);
             statement.setString(2, customer.email);
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -81,4 +80,33 @@ public class CustomerRepository {
         }
         return false;
     }
+    public void modifyCustomersColumn(String name,String latName,String email,int number,String address,String password) {
+        String sql = "UPDATE Customers SET name = ?,lastName = ?, email = ?, number = ?, address = ?, password = ?";
+        try(PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2,latName);
+            preparedStatement.setString(3,email);
+            preparedStatement.setInt(4,number);
+            preparedStatement.setString(5,address);
+            preparedStatement.setString(6,password);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public int getCustomerIdByEmail(String email) {
+        String sql = "SELECT id_customer FROM Customers WHERE email = ?";
+        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
+            preparedStatement.setString(1, email);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+return -1;
+    }
+
+
 }

@@ -5,12 +5,14 @@ import database.Database;
 import products.Category;
 import products.Order;
 import products.Product;
+import products.Status;
 
 import java.util.Collection;
 import java.util.Scanner;
 
 public class AdministratorFunctions {
     AdministratorRepository administratorRepository;
+
 
 
     public AdministratorFunctions(Database database) {
@@ -34,7 +36,6 @@ public class AdministratorFunctions {
                     e.printStackTrace();
                 }
             }
-
         } while (!choice.equalsIgnoreCase("no"));
     }
 
@@ -48,6 +49,10 @@ public class AdministratorFunctions {
                 displayCategories();
                 try {
                     System.out.println("Id category: ");
+                    while (!scanner.hasNextInt()) {
+                        System.out.println("Give a number");
+                        scanner.next();
+                    }
                     int delete = scanner.nextInt();
                     scanner.nextLine();
                     administratorRepository.removeCategoryFromDatabase(delete);
@@ -69,6 +74,9 @@ public class AdministratorFunctions {
     public void addProductToStore() {
         Scanner scanner = new Scanner(System.in);
         String choice;
+        if (!categoriesExists()) {
+            return;
+        }
         do {
             try {
                 System.out.println("Name: ");
@@ -90,18 +98,21 @@ public class AdministratorFunctions {
 
                 boolean correctCategory = false;
                 while (!correctCategory) {
-                    displayCategories();
-                    int id_category = scanner.nextInt();
-                    scanner.nextLine();
-                    if (categoryExists(id_category)) {
-                        Product product = new Product(null, name, price, quantity, id_category);
-                        administratorRepository.saveProduct(product);
-                        correctCategory = true;
-                    } else {
-                        System.out.println("Category does not exist");
+                     displayCategories();
+                    while (!scanner.hasNextDouble()) {
+                        System.out.println("Give a number.");
+                        scanner.next();
                     }
+                        int id_category = scanner.nextInt();
+                        scanner.nextLine();
+                        if (categoryExists(id_category)) {
+                            Product product = new Product(null, name, price, quantity, id_category, Status.AVAILABLE);
+                            administratorRepository.saveProduct(product);
+                            correctCategory = true;
+                        } else {
+                            System.out.println("Category does not exist");
+                        }
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -109,29 +120,42 @@ public class AdministratorFunctions {
             choice = scanner.nextLine();
         } while (!choice.equalsIgnoreCase("yes"));
     }
-
     public void displayProductsInStore() {
         Collection<Product> products = administratorRepository.loadProduct();
         System.out.println("Products in store");
         for (Product product : products) {
-            System.out.println(product);
+            if(product.getQuantity() == 0) {
+                product.setStatus(Status.LACK);
+            }
+            System.out.println(product.toStringForStore());
         }
     }
+
 
     public void productsInStore() {
         Scanner scanner = new Scanner(System.in);
         int choice_category;
+
         boolean bad_choice = false;
         while (!bad_choice) {
             displayCategories();
+            while (!scanner.hasNextInt()) {
+                System.out.println("Give a number");
+                scanner.next();
+            }
             choice_category = scanner.nextInt();
             Collection<Product> products = administratorRepository.loadSelectedCategoryProduct(choice_category);
             if (products.isEmpty()) {
-                System.out.println("There are no products\n");
-            }
-            System.out.println("Category products:");
-            for (Product product : products) {
-                System.out.println(product);
+                System.out.println("There are no products");
+                continue;
+            } else {
+                System.out.println("Category products:");
+                for (Product product : products) {
+                    if (product.getQuantity() == 0) {
+                        product.setStatus(Status.LACK);
+                    }
+                    System.out.println(product.toStringForStore());
+                }
             }
             bad_choice = true;
         }
@@ -199,10 +223,14 @@ public class AdministratorFunctions {
                     boolean correctCategory = false;
                     while (!correctCategory) {
                         displayCategories();
+                        while (!scanner.hasNextInt()) {
+                            System.out.println("Give a number");
+                            scanner.next();
+                        }
                         int id_category = scanner.nextInt();
                         scanner.nextLine();
                         if (categoryExists(id_category)) {
-                            administratorRepository.modifyDatabaseColumn(id_product, name, price, quantity, id_category);
+                            administratorRepository.modifyProductsColumn(id_product, name, price, quantity, id_category);
                             correctCategory = true;
                         } else {
                             System.out.println("Category does not exist");
@@ -226,7 +254,7 @@ public class AdministratorFunctions {
     public void displayCustomers() {
         Collection<Customer> customers = administratorRepository.loadCustomersFromDatabase();
         for (Customer customer : customers) {
-            System.out.println(customer);
+            System.out.println(customer.toStringForAdministrator());
         }
     }
 
@@ -239,6 +267,15 @@ public class AdministratorFunctions {
         }
         return false;
     }
+    private  boolean categoriesExists() {
+        Collection<Category> categories = administratorRepository.loadCategoriesFromDatabase();
+            if(categories.isEmpty()) {
+                System.out.println("First create category");
+                return false;
+        }
+        return true;
+    }
+
 }
 
 

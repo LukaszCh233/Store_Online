@@ -5,6 +5,8 @@ import database.Database;
 import products.Category;
 import products.Order;
 import products.Product;
+import products.Status;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,9 +30,17 @@ public class AdministratorRepository {
         Double price = resultSet.getDouble(3);
         int quantity = resultSet.getInt(4);
         Integer id_category = resultSet.getInt(5);
+        String statusString = resultSet.getString(6);
+        Status status;
+        if (statusString != null) {
+            status = Status.valueOf(resultSet.getString(6));
+        } else {
+            status = Status.AVAILABLE;
+
+        }
 
 
-        return new Product(idProduct, name, price, quantity, id_category);
+        return new Product(idProduct, name, price, quantity, id_category,status);
     }
 
     public static Customer mapResultSetToCustomer(ResultSet resultSet) throws SQLException {
@@ -40,8 +50,9 @@ public class AdministratorRepository {
         String email = resultSet.getString(4);
         int number = resultSet.getInt(5);
         String address = resultSet.getString(6);
+        String password = resultSet.getString(7);
 
-        return new Customer(idCustomer, name, lastName, email, number, address);
+        return new Customer(idCustomer, name, lastName, email, number, address,password);
 
     }
 
@@ -55,7 +66,7 @@ public class AdministratorRepository {
 
     public Collection<Customer> loadCustomersFromDatabase() {
         Collection<Customer> customers = new ArrayList<>();
-        String sql = "SELECT id_customer,name,lastName,email,number,address FROM Customers";
+        String sql = "SELECT * FROM Customers c JOIN Customers_password cp ON c.id_customer = cp.customer_id";
         try (Statement statement = database.getConnection().createStatement()) {
             ResultSet resultSet = statement.executeQuery(sql);
             while (resultSet.next()) {
@@ -167,7 +178,7 @@ public class AdministratorRepository {
         }
     }
 
-    public void modifyDatabaseColumn(int id, String name, double price, int quantity, int id_category) {
+    public void modifyProductsColumn(int id, String name, double price, int quantity, int id_category) {
         String sql = "UPDATE Products SET name = ?, price = ?, quantity = ?, id_category = ? WHERE id_product = ?";
         try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
             preparedStatement.setString(1, name);

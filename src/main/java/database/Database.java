@@ -17,7 +17,7 @@ public class Database implements AutoCloseable {
     }
 
     public Database() throws SQLException {
-        this("Shop.db");
+        this("Shop");
     }
 
     private void initializeDatabase() {
@@ -32,6 +32,7 @@ public class Database implements AutoCloseable {
                 "price REAL," +
                 "quantity INTEGER," +
                 "id_category INTEGER," +
+                "status TEXT," +
                 "FOREIGN KEY (id_category) REFERENCES Categories (id_category)" +
                 ");");
         sqlTable.add("CREATE TABLE IF NOT EXISTS Customers (" +
@@ -54,6 +55,7 @@ public class Database implements AutoCloseable {
                 "password TEXT," +
                 "email TEXT" +
                 ");");
+
 
         for (String sql : sqlTable) {
             try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql)) {

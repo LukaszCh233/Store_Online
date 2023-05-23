@@ -5,6 +5,7 @@ import administrator.AdministratorRepository;
 import database.Database;
 import products.Order;
 import products.Product;
+
 import java.time.LocalDate;
 import java.util.*;
 
@@ -28,13 +29,19 @@ public class CustomerFunctions {
 
         do {
             administratorFunctions.productsInStore();
-            System.out.println("Select product (id):");
+            while (!scanner.hasNextInt()) {
+                System.out.println("Give a number");
+                scanner.next();
+            }
             int idProduct = scanner.nextInt();
             scanner.nextLine();
-
             if (productExists(idProduct)) {
                 Product selectedProduct = getProductById(idProduct);
                 System.out.println("Quantity:");
+                while (!scanner.hasNextInt()) {
+                    System.out.println("Bad type try again");
+                    scanner.next();
+                }
                 int quantity = scanner.nextInt();
                 scanner.nextLine();
                 if (quantity > selectedProduct.getQuantity()) {
@@ -45,6 +52,7 @@ public class CustomerFunctions {
                     productsInBasket.add(selectedProduct);
                     customerRepository.updateProductQuantityInDatabase(idProduct, selectedProduct.getQuantity());
                     System.out.println("Product added to basket");
+
                 }
             } else {
                 System.out.println("Bad id, try again");
@@ -55,19 +63,17 @@ public class CustomerFunctions {
     }
 
     public void productsInBasket() {
-        if (productsInBasket.isEmpty()) {
-            System.out.println("Basket is empty");
-        } else {
 
-            System.out.println("Products:");
-            for (Product product : productsInBasket) {
-                System.out.println(product);
+        System.out.println("Products:");
+        for (Product product : productsInBasket) {
 
-            }
-            double totalPrice = calculateBasketTotalPrice();
-            System.out.println("Total Price: " + totalPrice);
+            System.out.println(product.toStringForBasket());
+
         }
+        double totalPrice = calculateBasketTotalPrice();
+        System.out.println("Total Price: " + totalPrice);
     }
+
 
     public double calculateBasketTotalPrice() {
         double totalPrice = 0.0;
@@ -80,6 +86,10 @@ public class CustomerFunctions {
     public void removeProductFromBasket() {
         Scanner scanner = new Scanner(System.in);
         String choice;
+        if (productsInBasket.isEmpty()) {
+            System.out.println("Basket is empty");
+            return;
+        }
         do {
             System.out.println("Remove product yes/no");
             choice = scanner.nextLine();
@@ -90,7 +100,21 @@ public class CustomerFunctions {
                     int id = scanner.nextInt();
                     scanner.nextLine();
                     if (productExistsInBasket(id)) {
-                        removeProductById(id);
+                        Product removeProduct = getProductById(id);
+                        System.out.println("Quantity:");
+                        int quantity = scanner.nextInt();
+                        removeProduct.setSelectedQuantity(quantity);
+
+                        if (quantity < removeProduct.getSelectedQuantity()) {
+                            removeProduct.setSelectedQuantity(removeProduct.getSelectedQuantity() - quantity);
+                            removeProduct.setQuantity(removeProduct.getQuantity() + quantity);
+                            customerRepository.updateProductQuantityInDatabase(id, removeProduct.getQuantity());
+                        } else {
+                            removeProduct.setQuantity(removeProduct.getQuantity() + quantity);
+                            removeProductById(id);
+                            customerRepository.updateProductQuantityInDatabase(id, removeProduct.getQuantity());
+                            System.out.println("Product delete");
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -108,7 +132,7 @@ public class CustomerFunctions {
         return false;
     }
 
-    void removeProductById(int id) {
+    public void removeProductById(int id) {
         Iterator<Product> iterator = productsInBasket.iterator();
         while (iterator.hasNext()) {
             Product product = iterator.next();
@@ -123,22 +147,32 @@ public class CustomerFunctions {
         Scanner scanner = new Scanner(System.in);
         String choice;
 
+        if (productsInBasket.isEmpty()) {
+            System.out.println("Basket is empty");
+            return;
+        }
+
         do {
             System.out.println("Do you want submit order? yes/no");
             choice = scanner.nextLine();
             if (choice.equalsIgnoreCase("yes")) {
                 productsInBasket();
-                System.out.println("Your id:");
-                int idCustomer = scanner.nextInt();
-                LocalDate orderData = LocalDate.now();
+                System.out.println("Your email:");
+                String email = scanner.nextLine();
+                int idCustomer = customerRepository.getCustomerIdByEmail(email);
+                if (idCustomer != -1) {
+                    LocalDate orderData = LocalDate.now();
 
-                Order order = new Order(null, idCustomer, orderData, calculateBasketTotalPrice());
+                    Order order = new Order(null, idCustomer, orderData, calculateBasketTotalPrice());
 
-                customerRepository.saveOrderToDatabase(order);
+                    customerRepository.saveOrderToDatabase(order);
+                    productsInBasket.clear();
+                }
             }
 
         } while (!choice.equalsIgnoreCase("no"));
     }
+
 
     public boolean productExists(int idProduct) {
         Collection<Product> products = administratorRepository.loadProduct();
@@ -159,4 +193,31 @@ public class CustomerFunctions {
         }
         return null;
     }
+
+    public Customer getCustomerById(int id) {
+        Collection<Customer> customers = administratorRepository.loadCustomersFromDatabase();
+        for (Customer customer : customers) {
+            if (customer.getId_customer() == id) {
+                return customer;
+            }
+        }
+        return null;
+    }
+
+    public void displayCustomerData(String loggedInEmail) {
+        int customerId = customerRepository.getCustomerIdByEmail(loggedInEmail);
+        if (customerId != -1) {
+            Customer loggedCustomer = getCustomerById(customerId);
+            if (loggedCustomer != null) {
+                System.out.println(loggedCustomer.toStringForCustomer());
+            } else {
+                System.out.println("Customer not found.");
+            }
+        } else {
+            System.out.println("Customer not found.");
+        }
+    }
+
 }
+
+
