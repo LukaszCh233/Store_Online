@@ -1,6 +1,5 @@
 package administrator;
 
-import customers.Customer;
 import database.Database;
 import products.Category;
 import products.Order;
@@ -18,11 +17,6 @@ public class AdministratorRepository {
         this.database = database;
     }
 
-    public static Category mapResultSetToCategory(ResultSet resultSet) throws SQLException {
-        int id_category = resultSet.getInt(1);
-        String name = resultSet.getString(2);
-        return new Category(id_category, name);
-    }
 
     public static Product mapResultSetToProduct(ResultSet resultSet) throws SQLException {
         Integer idProduct = resultSet.getInt(1);
@@ -36,25 +30,10 @@ public class AdministratorRepository {
             status = Status.valueOf(resultSet.getString(6));
         } else {
             status = Status.AVAILABLE;
-
         }
-
-
         return new Product(idProduct, name, price, quantity, id_category,status);
     }
 
-    public static Customer mapResultSetToCustomer(ResultSet resultSet) throws SQLException {
-        Integer idCustomer = resultSet.getInt(1);
-        String name = resultSet.getString(2);
-        String lastName = resultSet.getString(3);
-        String email = resultSet.getString(4);
-        int number = resultSet.getInt(5);
-        String address = resultSet.getString(6);
-        String password = resultSet.getString(7);
-
-        return new Customer(idCustomer, name, lastName, email, number, address,password);
-
-    }
 
     public static Order mapResultSetToOrder(ResultSet resultSet) throws SQLException {
         Integer idOrder = resultSet.getInt(1);
@@ -62,20 +41,6 @@ public class AdministratorRepository {
         Date orderData = resultSet.getDate(3);
         Double price = resultSet.getDouble(4);
         return new Order(idOrder, idCustomer, orderData.toLocalDate(), price);
-    }
-
-    public Collection<Customer> loadCustomersFromDatabase() {
-        Collection<Customer> customers = new ArrayList<>();
-        String sql = "SELECT * FROM Customers c JOIN Customers_password cp ON c.id_customer = cp.customer_id";
-        try (Statement statement = database.getConnection().createStatement()) {
-            ResultSet resultSet = statement.executeQuery(sql);
-            while (resultSet.next()) {
-                customers.add(mapResultSetToCustomer(resultSet));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return customers;
     }
 
     public void addCategoryToDatabase(Category category) {
@@ -88,19 +53,6 @@ public class AdministratorRepository {
         }
     }
 
-    public Collection<Category> loadCategoriesFromDatabase() {
-        Collection<Category> categories = new ArrayList<>();
-        String sql = "SELECT * FROM Categories";
-        try (Statement statement = database.getConnection().createStatement()) {
-            ResultSet resultSet = statement.executeQuery(sql);
-            while (resultSet.next()) {
-                categories.add(mapResultSetToCategory(resultSet));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return categories;
-    }
 
     public void saveProduct(Product product) {
         String sql = "INSERT INTO Products (name,price,quantity,id_category) VALUES (?,?,?,?)";

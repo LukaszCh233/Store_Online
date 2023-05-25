@@ -1,6 +1,7 @@
 package interfaceStore;
 
 import administrator.AdministratorFunctions;
+import common.CommonFunctions;
 import customers.Customer;
 import customers.CustomerFunctions;
 import customers.CustomerRepository;
@@ -13,7 +14,9 @@ public class StoreMenu implements AutoCloseable {
     AdministratorFunctions administratorFunctions;
     CustomerFunctions customerFunctions;
     CustomerRepository customerRepository;
+    CommonFunctions commonFunctions;
     String loggedInEmail;
+
 
 
     public StoreMenu() throws SQLException {
@@ -21,6 +24,7 @@ public class StoreMenu implements AutoCloseable {
         administratorFunctions = new AdministratorFunctions(database);
         customerFunctions = new CustomerFunctions(database);
         customerRepository = new CustomerRepository(database);
+        commonFunctions = new CommonFunctions(database);
     }
 
     public void interfaceChoice() {
@@ -60,7 +64,6 @@ public class StoreMenu implements AutoCloseable {
 
         }
     }
-
     public void registerCustomer() {
         Scanner scanner = new Scanner(System.in);
 
@@ -93,7 +96,6 @@ public class StoreMenu implements AutoCloseable {
         System.out.println("Register finish");
         customerInterface();
     }
-
     public void loginCustomer() {
 
         Scanner scanner = new Scanner(System.in);
@@ -104,7 +106,7 @@ public class StoreMenu implements AutoCloseable {
             String email = scanner.nextLine();
             System.out.println("Password:");
             String password = scanner.nextLine();
-             loginSuccessful = customerRepository.login(email, password);
+            loginSuccessful = customerRepository.login(email, password);
             if (loginSuccessful) {
                 loggedInEmail = email;
                 customerRepository.getCustomerIdByEmail(email);
@@ -116,6 +118,7 @@ public class StoreMenu implements AutoCloseable {
             }
         }
     }
+
 
 
     public void administratorInterface() {
@@ -138,13 +141,13 @@ public class StoreMenu implements AutoCloseable {
             switch (choice) {
                 case "1": administratorFunctions.addProductToStore(); break;
                 case "2": administratorFunctions.deleteProduct(); break;
-                case "3": administratorFunctions.displayProductsInStore(); break;
+                case "3": commonFunctions.displayProductsInStore(); break;
                 case "4": administratorFunctions.modifyProductData(); break;
                 case "5": administratorFunctions.displayOrders(); break;
                 case "6": administratorFunctions.displayCustomers(); break;
                 case "7": administratorFunctions.createCategory(); break;
-                case "8": administratorFunctions.displayCategories(); break;
-                case "9": administratorFunctions.productsInStore(); break;
+                case "8": commonFunctions.displayCategories(); break;
+                case "9": commonFunctions.productsInStore(); break;
                 case "10":administratorFunctions.deleteCategory(); break;
                 case "0": break;
                 default: System.out.println("Bad choice, try again");
@@ -172,7 +175,7 @@ public class StoreMenu implements AutoCloseable {
                 case "3": customerFunctions.productsInBasket(); break;
                 case "4": customerFunctions.submitOrder(); break;
                 case "5": break;
-                case "6": customerFunctions.displayCustomerData(loggedInEmail);
+                case "6": customerFunctions.displayCustomerData(loggedInEmail); break;
                 case "0": break;
                 default:
                     System.out.println("Bad choice, try again");

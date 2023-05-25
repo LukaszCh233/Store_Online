@@ -2,6 +2,8 @@ package customers;
 
 import administrator.AdministratorFunctions;
 import administrator.AdministratorRepository;
+import common.CommonFunctions;
+import common.CommonRepository;
 import database.Database;
 import products.Order;
 import products.Product;
@@ -13,13 +15,17 @@ public class CustomerFunctions {
     CustomerRepository customerRepository;
     AdministratorFunctions administratorFunctions;
     AdministratorRepository administratorRepository;
-    List<Product> productsInBasket = new ArrayList<>();
+    CommonRepository commonRepository;
+    CommonFunctions commonFunctions;
+    Collection<Product> productsInBasket = new ArrayList<>();
 
 
     public CustomerFunctions(Database database) {
         this.customerRepository = new CustomerRepository(database);
         this.administratorFunctions = new AdministratorFunctions(database);
         this.administratorRepository = new AdministratorRepository(database);
+        this.commonRepository = new CommonRepository(database);
+        this.commonFunctions = new CommonFunctions(database);
 
     }
 
@@ -28,7 +34,7 @@ public class CustomerFunctions {
         String choice;
 
         do {
-            administratorFunctions.productsInStore();
+            commonFunctions.productsInStore();
             while (!scanner.hasNextInt()) {
                 System.out.println("Give a number");
                 scanner.next();
@@ -52,7 +58,6 @@ public class CustomerFunctions {
                     productsInBasket.add(selectedProduct);
                     customerRepository.updateProductQuantityInDatabase(idProduct, selectedProduct.getQuantity());
                     System.out.println("Product added to basket");
-
                 }
             } else {
                 System.out.println("Bad id, try again");
@@ -68,12 +73,10 @@ public class CustomerFunctions {
         for (Product product : productsInBasket) {
 
             System.out.println(product.toStringForBasket());
-
         }
         double totalPrice = calculateBasketTotalPrice();
         System.out.println("Total Price: " + totalPrice);
     }
-
 
     public double calculateBasketTotalPrice() {
         double totalPrice = 0.0;
@@ -100,6 +103,7 @@ public class CustomerFunctions {
                     int id = scanner.nextInt();
                     scanner.nextLine();
                     if (productExistsInBasket(id)) {
+                        int quantityInBasket = getProductQuantityInBasket(id);
                         Product removeProduct = getProductById(id);
                         System.out.println("Quantity:");
                         int quantity = scanner.nextInt();
@@ -121,6 +125,15 @@ public class CustomerFunctions {
                 }
             }
         } while (!choice.equalsIgnoreCase("no"));
+    }
+
+    public int getProductQuantityInBasket(int productId) {
+        for (Product product : productsInBasket) {
+            if (product.getId_product() == productId) {
+                return product.getSelectedQuantity();
+            }
+        }
+        return 0;
     }
 
     boolean productExistsInBasket(int id) {
@@ -173,7 +186,6 @@ public class CustomerFunctions {
         } while (!choice.equalsIgnoreCase("no"));
     }
 
-
     public boolean productExists(int idProduct) {
         Collection<Product> products = administratorRepository.loadProduct();
         for (Product product : products) {
@@ -195,7 +207,7 @@ public class CustomerFunctions {
     }
 
     public Customer getCustomerById(int id) {
-        Collection<Customer> customers = administratorRepository.loadCustomersFromDatabase();
+        Collection<Customer> customers = commonRepository.loadCustomersFromDatabase();
         for (Customer customer : customers) {
             if (customer.getId_customer() == id) {
                 return customer;
@@ -217,7 +229,6 @@ public class CustomerFunctions {
             System.out.println("Customer not found.");
         }
     }
-
 }
 
 
