@@ -12,10 +12,7 @@ public class Customer {
     String address;
     String password;
 
-
-
-
-    public Customer(Integer id_customer, String name, String lastName, String email, int number, String address,String password) {
+    public Customer(Integer id_customer, String name, String lastName, String email, int number, String address, String password) {
         this.id_customer = id_customer;
         this.name = name;
         this.lastName = lastName;
@@ -26,23 +23,23 @@ public class Customer {
 
     }
 
-
     public String toStringForAdministrator() {
         return
-                        "id: " + id_customer +
-                        " | Name: " + name  +
+                "id: " + id_customer +
+                        " | Name: " + name +
                         " | Last Name: " + lastName +
-                        " | Email: " + email  +
+                        " | Email: " + email +
                         " | Number: " + number +
                         " | Address: " + address +
-                                "\n------------------------------------------------------------------------------------";
+                        "\n------------------------------------------------------------------------------------";
     }
+
     public String toStringForCustomer() {
         return
                 "id: " + id_customer +
-                        " | Name: " + name  +
+                        " | Name: " + name +
                         " | Last Name: " + lastName +
-                        " | Email: " + email  +
+                        " | Email: " + email +
                         " | Number: " + number +
                         " | Address: " + address +
                         " | Password: " + password +

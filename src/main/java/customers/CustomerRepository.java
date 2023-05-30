@@ -2,16 +2,38 @@ package customers;
 
 import database.Database;
 import products.Order;
+import products.Status;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class CustomerRepository {
     Database database;
 
     public CustomerRepository(Database database) {
         this.database = database;
+    }
+
+    public static Order mapResultSetToOrder(ResultSet resultSet) throws SQLException {
+        Integer idOrder = resultSet.getInt(1);
+        Integer idCustomer = resultSet.getInt(2);
+        Date orderData = resultSet.getDate(3);
+        Double price = resultSet.getDouble(4);
+        String statusString = resultSet.getString(5);
+        Status status;
+        if (!statusString.equals(Status.ORDERED.name())) {
+            if (statusString.equals(Status.SENT.name())) {
+                status = Status.SENT;
+            } else {
+                status = Status.valueOf(statusString);
+            }
+        } else {
+            status = Status.ORDERED;
+        }
+        return new Order(idOrder, idCustomer, orderData.toLocalDate(), price, status);
     }
 
     public void updateProductQuantityInDatabase(int productId, int quantity) {
@@ -31,11 +53,12 @@ public class CustomerRepository {
     }
 
     public void saveOrderToDatabase(Order order) {
-        String sql = "INSERT INTO Orders (id_customer,order_data,price) VALUES (?,?,?)";
+        String sql = "INSERT INTO Orders (id_customer,order_data,price,status) VALUES (?,?,?,?)";
         try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
             preparedStatement.setInt(1, order.getIdCustomer());
             preparedStatement.setDate(2, Date.valueOf(order.getOrderData()));
             preparedStatement.setDouble(3, order.getPrice());
+            preparedStatement.setString(4, String.valueOf(order.getStatus()));
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -66,7 +89,7 @@ public class CustomerRepository {
 
     public boolean login(String email, String password) {
         String sql = "SELECT COUNT(*) FROM Customers c JOIN Customers_password cp ON c.id_customer = cp.customer_id WHERE" +
-                " c.email = ? AND cp.password = ?";
+                " cp.email = ? AND cp.password = ?";
         try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
             preparedStatement.setString(1, email);
             preparedStatement.setString(2, password);
@@ -80,22 +103,39 @@ public class CustomerRepository {
         }
         return false;
     }
-    public void modifyCustomersColumn(String name,String latName,String email,int number,String address,String password) {
-        String sql = "UPDATE Customers SET name = ?,lastName = ?, email = ?, number = ?, address = ?, password = ?";
-        try(PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
+
+    public void modifyCustomersColumnInDatabase(int idCustomer, String name, String lastName, int number, String address) {
+        String sql = "UPDATE Customers " +
+                "SET name = ?, lastName = ?, number = ?, address = ? " +
+                "WHERE id_customer = ? ";
+
+        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
             preparedStatement.setString(1, name);
-            preparedStatement.setString(2,latName);
-            preparedStatement.setString(3,email);
-            preparedStatement.setInt(4,number);
-            preparedStatement.setString(5,address);
-            preparedStatement.setString(6,password);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setInt(3, number);
+            preparedStatement.setString(4, address);
+            preparedStatement.setInt(5,idCustomer);
+
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+    public void modifyCustomersPasswordColumnInDatabase(int idCustomer,String email,String password) {
+        String sql = "UPDATE Customers_password SET email = ?, password = ? WHERE customer_id = ?";
+        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
+            preparedStatement.setString(1, email);
+            preparedStatement.setString(2,password);
+            preparedStatement.setInt(3,idCustomer);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public int getCustomerIdByEmail(String email) {
-        String sql = "SELECT id_customer FROM Customers WHERE email = ?";
+        String sql = "SELECT customer_id FROM Customers_password WHERE email = ?";
         try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
             preparedStatement.setString(1, email);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -105,8 +145,21 @@ public class CustomerRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-return -1;
+        return -1;
     }
 
-
+    public Collection<Order> loadOrders(int id) {
+        Collection<Order> orders = new ArrayList<>();
+        String sql = " SELECT * FROM Orders WHERE id_customer = ?";
+        try (PreparedStatement statement = database.getConnection().prepareStatement(sql)) {
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                orders.add(mapResultSetToOrder(resultSet));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
 }

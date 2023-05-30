@@ -198,10 +198,37 @@ public class AdministratorFunctions {
         } while (!choice.equalsIgnoreCase("no"));
     }
 
+    public void sendOrder() {
+        Scanner scanner = new Scanner(System.in);
+        String choice;
+
+        do {
+            System.out.println("Send order yes/no");
+            choice = scanner.nextLine();
+            if (choice.equalsIgnoreCase("yes")) {
+                displayOrders();
+                try {
+                    System.out.println("Id product: ");
+                    while (!scanner.hasNextInt()) {
+                        System.out.println("Bad type try again");
+                        scanner.next();
+                    }
+                    int idOrders = scanner.nextInt();
+                    scanner.nextLine();
+                    administratorRepository.updateOrderStatus(idOrders, Status.SENT);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } while (!choice.equalsIgnoreCase("yes"));
+    }
+
     public void displayOrders() {
         Collection<Order> orders = administratorRepository.loadOrders();
         for (Order order : orders) {
-            System.out.println(order);
+            System.out.println(order.toStringForAdministrator());
         }
     }
 

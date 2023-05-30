@@ -11,20 +11,32 @@ public class Order {
     Integer idCustomer;
     LocalDate orderData;
     Double price;
+    Status status;
 
-    public Order(Integer idOrder, Integer idCustomer, LocalDate orderData, Double price) {
+
+    public Order(Integer idOrder, Integer idCustomer, LocalDate orderData, Double price, Status status) {
         this.idOrder = idOrder;
         this.idCustomer = idCustomer;
         this.orderData = orderData;
         this.price = price;
+        this.status =status;
+
     }
 
-    @Override
-    public String toString() {
+
+    public String toStringForAdministrator() {
         return
                 "Order id: " + idOrder +
                 " | Customer id: " + idCustomer +
                 " | Order data: " + orderData +
-                " | Cost: " + price +"zl";
+                " | Cost: " + price +"zl" +
+                        " | " + status;
+    }
+    public String toStringForCustomer() {
+        return
+                        " | Customer id: " + idCustomer +
+                        " | Order data: " + orderData +
+                        " | Cost: " + price +"zl" +
+                                " | " + status;
     }
 }

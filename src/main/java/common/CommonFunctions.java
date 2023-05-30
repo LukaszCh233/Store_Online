@@ -5,7 +5,6 @@ import database.Database;
 import products.Category;
 import products.Product;
 import products.Status;
-
 import java.util.Collection;
 import java.util.Scanner;
 
@@ -13,13 +12,12 @@ public class CommonFunctions {
     AdministratorRepository administratorRepository;
     CommonRepository commonRepository;
 
-
-
     public CommonFunctions(Database database) {
         this.administratorRepository = new AdministratorRepository(database);
         this.commonRepository = new CommonRepository(database);
 
     }
+
     public void productsInStore() {
         Scanner scanner = new Scanner(System.in);
         int choice_category;
@@ -48,6 +46,7 @@ public class CommonFunctions {
             bad_choice = true;
         }
     }
+
     public void displayCategories() {
         Collection<Category> categories = commonRepository.loadCategoriesFromDatabase();
         System.out.println("Categories:");
@@ -55,11 +54,12 @@ public class CommonFunctions {
             System.out.println(category);
         }
     }
+
     public void displayProductsInStore() {
         Collection<Product> products = commonRepository.loadProduct();
         System.out.println("Products in store");
         for (Product product : products) {
-            if(product.getQuantity() == 0) {
+            if (product.getQuantity() == 0) {
                 product.setStatus(Status.LACK);
             }
             System.out.println(product.toStringForStore());

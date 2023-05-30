@@ -7,9 +7,13 @@ import common.CommonRepository;
 import database.Database;
 import products.Order;
 import products.Product;
+import products.Status;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Scanner;
 
 public class CustomerFunctions {
     CustomerRepository customerRepository;
@@ -18,7 +22,6 @@ public class CustomerFunctions {
     CommonRepository commonRepository;
     CommonFunctions commonFunctions;
     Collection<Product> productsInBasket = new ArrayList<>();
-
 
     public CustomerFunctions(Database database) {
         this.customerRepository = new CustomerRepository(database);
@@ -164,7 +167,6 @@ public class CustomerFunctions {
             System.out.println("Basket is empty");
             return;
         }
-
         do {
             System.out.println("Do you want submit order? yes/no");
             choice = scanner.nextLine();
@@ -176,7 +178,7 @@ public class CustomerFunctions {
                 if (idCustomer != -1) {
                     LocalDate orderData = LocalDate.now();
 
-                    Order order = new Order(null, idCustomer, orderData, calculateBasketTotalPrice());
+                    Order order = new Order(null, idCustomer, orderData, calculateBasketTotalPrice(), Status.ORDERED);
 
                     customerRepository.saveOrderToDatabase(order);
                     productsInBasket.clear();
@@ -184,6 +186,59 @@ public class CustomerFunctions {
             }
 
         } while (!choice.equalsIgnoreCase("no"));
+    }
+
+    public void changeAccountData(String loggedEmail) {
+        Scanner scanner = new Scanner(System.in);
+        String choice;
+        int customerId = customerRepository.getCustomerIdByEmail(loggedEmail);
+
+        do {
+            System.out.println("Modify data yes/no");
+            choice = scanner.nextLine();
+            if (choice.equalsIgnoreCase("yes")) {
+                displayCustomerData(loggedEmail);
+
+                try {
+                    System.out.println("Modify password&email - 1\n basic data - 2 ");
+                    int whatModify = scanner.nextInt();
+                    scanner.nextLine();
+                    if (whatModify == 2) {
+                        System.out.println("Name:");
+                        String name = scanner.nextLine();
+                        scanner.nextLine();
+
+                        System.out.println("LastName:");
+                        String lastName = scanner.nextLine();
+
+                        System.out.println("Number:");
+                        while (!scanner.hasNextInt()) {
+                            System.out.println("Give a number");
+                            scanner.next();
+                        }
+                        int number = scanner.nextInt();
+                        scanner.nextLine();
+
+                        System.out.println("Address:");
+                        String address = scanner.nextLine();
+
+                        customerRepository.modifyCustomersColumnInDatabase(customerId, name, lastName, number, address);
+                    } else if (whatModify == 1) {
+                        System.out.println("Email:");
+                        String email = scanner.nextLine();
+
+                        System.out.println("Password:");
+                        String password = scanner.nextLine();
+
+                        customerRepository.modifyCustomersPasswordColumnInDatabase(customerId, email, password);
+                    } else System.out.println("Try again");
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } while (!choice.equalsIgnoreCase("yes"));
     }
 
     public boolean productExists(int idProduct) {
@@ -216,6 +271,17 @@ public class CustomerFunctions {
         return null;
     }
 
+    public Order getOrdersById(int id) {
+        Collection<Order> allOrders = customerRepository.loadOrders(id);
+
+        for (Order order : allOrders) {
+            if (order.getIdCustomer() == id) {
+                System.out.println(order.toStringForCustomer());
+            }
+        }
+        return null;
+    }
+
     public void displayCustomerData(String loggedInEmail) {
         int customerId = customerRepository.getCustomerIdByEmail(loggedInEmail);
         if (customerId != -1) {
@@ -229,6 +295,22 @@ public class CustomerFunctions {
             System.out.println("Customer not found.");
         }
     }
+
+    public void displayOrdersHistory(String loggedEmail) {
+
+        int customerId = customerRepository.getCustomerIdByEmail(loggedEmail);
+        if (customerId != -1) {
+            Order loggedCustomer = getOrdersById(customerId);
+            if (loggedCustomer != null) {
+                System.out.println(loggedCustomer.toStringForCustomer());
+            }
+        } else {
+            System.out.println("Customer not found.");
+        }
+    }
 }
+
+
+
 
 

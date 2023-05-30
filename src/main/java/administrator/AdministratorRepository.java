@@ -5,7 +5,6 @@ import products.Category;
 import products.Order;
 import products.Product;
 import products.Status;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +15,6 @@ public class AdministratorRepository {
     public AdministratorRepository(Database database) {
         this.database = database;
     }
-
 
     public static Product mapResultSetToProduct(ResultSet resultSet) throws SQLException {
         Integer idProduct = resultSet.getInt(1);
@@ -31,16 +29,26 @@ public class AdministratorRepository {
         } else {
             status = Status.AVAILABLE;
         }
-        return new Product(idProduct, name, price, quantity, id_category,status);
+        return new Product(idProduct, name, price, quantity, id_category, status);
     }
-
 
     public static Order mapResultSetToOrder(ResultSet resultSet) throws SQLException {
         Integer idOrder = resultSet.getInt(1);
         Integer idCustomer = resultSet.getInt(2);
         Date orderData = resultSet.getDate(3);
         Double price = resultSet.getDouble(4);
-        return new Order(idOrder, idCustomer, orderData.toLocalDate(), price);
+        String statusString = resultSet.getString(5);
+        Status status;
+        if (!statusString.equals(Status.ORDERED.name())) {
+            if (statusString.equals(Status.SENT.name())) {
+                status = Status.SENT;
+            } else {
+                status = Status.valueOf(statusString);
+            }
+        } else {
+            status = Status.ORDERED;
+        }
+        return new Order(idOrder, idCustomer, orderData.toLocalDate(), price, status);
     }
 
     public void addCategoryToDatabase(Category category) {
@@ -52,7 +60,6 @@ public class AdministratorRepository {
             e.printStackTrace();
         }
     }
-
 
     public void saveProduct(Product product) {
         String sql = "INSERT INTO Products (name,price,quantity,id_category) VALUES (?,?,?,?)";
@@ -143,7 +150,19 @@ public class AdministratorRepository {
             e.printStackTrace();
         }
     }
+
+    public void updateOrderStatus(int idOrder, Status status) {
+        String sql = "UPDATE Orders SET status = ? WHERE id_order = ?";
+        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
+            preparedStatement.setString(1, status.name());
+            preparedStatement.setInt(2, idOrder);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
+
 
 
 

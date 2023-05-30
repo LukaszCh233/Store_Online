@@ -5,6 +5,7 @@ import products.Product;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Getter
 public class Basket {
     Integer id_product;
@@ -29,7 +30,7 @@ public class Basket {
         return
                 "id: " + id_product +
                         " | name: " + name +
-                        " | price: " + price +"zl" +
+                        " | price: " + price + "zl" +
                         " | quantity: " + quantity +
                         "\n---------------------------------------------------";
     }

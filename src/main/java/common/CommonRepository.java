@@ -18,6 +18,40 @@ public class CommonRepository {
         this.database = database;
     }
 
+    public static Category mapResultSetToCategory(ResultSet resultSet) throws SQLException {
+        int id_category = resultSet.getInt(1);
+        String name = resultSet.getString(2);
+        return new Category(id_category, name);
+    }
+
+    public static Product mapResultSetToProduct(ResultSet resultSet) throws SQLException {
+        Integer idProduct = resultSet.getInt(1);
+        String name = resultSet.getString(2);
+        Double price = resultSet.getDouble(3);
+        int quantity = resultSet.getInt(4);
+        Integer id_category = resultSet.getInt(5);
+        String statusString = resultSet.getString(6);
+        Status status;
+        if (statusString != null) {
+            status = Status.valueOf(resultSet.getString(6));
+        } else {
+            status = Status.AVAILABLE;
+        }
+        return new Product(idProduct, name, price, quantity, id_category, status);
+    }
+
+    public static Customer mapResultSetToCustomer(ResultSet resultSet) throws SQLException {
+        Integer idCustomer = resultSet.getInt(1);
+        String name = resultSet.getString(2);
+        String lastName = resultSet.getString(3);
+        String email = resultSet.getString(4);
+        int number = resultSet.getInt(5);
+        String address = resultSet.getString(6);
+        String password = resultSet.getString(7);
+
+        return new Customer(idCustomer, name, lastName, email, number, address, password);
+    }
+
     public Collection<Category> loadCategoriesFromDatabase() {
         Collection<Category> categories = new ArrayList<>();
         String sql = "SELECT * FROM Categories";
@@ -31,6 +65,7 @@ public class CommonRepository {
         }
         return categories;
     }
+
     public Collection<Customer> loadCustomersFromDatabase() {
         Collection<Customer> customers = new ArrayList<>();
         String sql = "SELECT * FROM Customers c JOIN Customers_password cp ON c.id_customer = cp.customer_id";
@@ -44,6 +79,7 @@ public class CommonRepository {
         }
         return customers;
     }
+
     public Collection<Product> loadProduct() {
         Collection<Product> products = new ArrayList<>();
         String sql = "SELECT * FROM Products";
@@ -56,38 +92,5 @@ public class CommonRepository {
             e.printStackTrace();
         }
         return products;
-    }
-
-    public static Category mapResultSetToCategory(ResultSet resultSet) throws SQLException {
-        int id_category = resultSet.getInt(1);
-        String name = resultSet.getString(2);
-        return new Category(id_category, name);
-    }
-    public static Product mapResultSetToProduct(ResultSet resultSet) throws SQLException {
-        Integer idProduct = resultSet.getInt(1);
-        String name = resultSet.getString(2);
-        Double price = resultSet.getDouble(3);
-        int quantity = resultSet.getInt(4);
-        Integer id_category = resultSet.getInt(5);
-        String statusString = resultSet.getString(6);
-        Status status;
-        if (statusString != null) {
-            status = Status.valueOf(resultSet.getString(6));
-        } else {
-            status = Status.AVAILABLE;
-
-        }
-        return new Product(idProduct, name, price, quantity, id_category,status);    }
-    public static Customer mapResultSetToCustomer(ResultSet resultSet) throws SQLException {
-        Integer idCustomer = resultSet.getInt(1);
-        String name = resultSet.getString(2);
-        String lastName = resultSet.getString(3);
-        String email = resultSet.getString(4);
-        int number = resultSet.getInt(5);
-        String address = resultSet.getString(6);
-        String password = resultSet.getString(7);
-
-        return new Customer(idCustomer, name, lastName, email, number, address,password);
-
     }
 }

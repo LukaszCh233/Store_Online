@@ -17,8 +17,6 @@ public class StoreMenu implements AutoCloseable {
     CommonFunctions commonFunctions;
     String loggedInEmail;
 
-
-
     public StoreMenu() throws SQLException {
         database = new Database();
         administratorFunctions = new AdministratorFunctions(database);
@@ -61,9 +59,9 @@ public class StoreMenu implements AutoCloseable {
                 registerCustomer();
                 correct = true;
             } else System.out.println("Try again");
-
         }
     }
+
     public void registerCustomer() {
         Scanner scanner = new Scanner(System.in);
 
@@ -90,12 +88,13 @@ public class StoreMenu implements AutoCloseable {
         System.out.println("Password:");
         String password = scanner.nextLine();
 
-        Customer customer = new Customer(null, name, lastName, email, number, address,password);
+        Customer customer = new Customer(null, name, lastName, email, number, address, password);
 
         customerRepository.saveCustomerToDatabase(customer);
         System.out.println("Register finish");
         customerInterface();
     }
+
     public void loginCustomer() {
 
         Scanner scanner = new Scanner(System.in);
@@ -112,14 +111,11 @@ public class StoreMenu implements AutoCloseable {
                 customerRepository.getCustomerIdByEmail(email);
                 System.out.println("Login successful");
                 customerInterface();
-
             } else {
                 System.out.println("Try again :)");
             }
         }
     }
-
-
 
     public void administratorInterface() {
         Scanner scanner = new Scanner(System.in);
@@ -136,21 +132,24 @@ public class StoreMenu implements AutoCloseable {
             System.out.println("8: Categories");
             System.out.println("9: Products from selected category");
             System.out.println("10: Delete category");
+            System.out.println("11: Order management");
             System.out.println("0: Close program");
             choice = scanner.nextLine();
             switch (choice) {
-                case "1": administratorFunctions.addProductToStore(); break;
-                case "2": administratorFunctions.deleteProduct(); break;
-                case "3": commonFunctions.displayProductsInStore(); break;
-                case "4": administratorFunctions.modifyProductData(); break;
-                case "5": administratorFunctions.displayOrders(); break;
-                case "6": administratorFunctions.displayCustomers(); break;
-                case "7": administratorFunctions.createCategory(); break;
-                case "8": commonFunctions.displayCategories(); break;
-                case "9": commonFunctions.productsInStore(); break;
-                case "10":administratorFunctions.deleteCategory(); break;
+                case "1": administratorFunctions.addProductToStore() ;break;
+                case "2": administratorFunctions.deleteProduct() ;break;
+                case "3": commonFunctions.displayProductsInStore() ;break;
+                case "4": administratorFunctions.modifyProductData() ;break;
+                case "5": administratorFunctions.displayOrders() ;break;
+                case "6": administratorFunctions.displayCustomers() ;break;
+                case "7": administratorFunctions.createCategory() ;break;
+                case "8": commonFunctions.displayCategories() ;break;
+                case "9": commonFunctions.productsInStore() ;break;
+                case "10": administratorFunctions.deleteCategory() ;break;
+                case "11": administratorFunctions.sendOrder() ;break;
                 case "0": break;
-                default: System.out.println("Bad choice, try again");
+                default:
+                    System.out.println("Bad choice, try again");
 
             }
         } while (!choice.equalsIgnoreCase("0"));
@@ -160,22 +159,23 @@ public class StoreMenu implements AutoCloseable {
         Scanner scanner = new Scanner(System.in);
         String choice;
         do {
-
             System.out.println("1: Add product to basket");
             System.out.println("2: Delete product from basket");
             System.out.println("3: Basket");
             System.out.println("4: Submit your order");
             System.out.println("5: History of orders");
             System.out.println("6: Account data");
+            System.out.println("7: Update account data");
             System.out.println("0: Close program");
             choice = scanner.nextLine();
             switch (choice) {
-                case "1": customerFunctions.addProductToYourBasket(); break;
-                case "2": customerFunctions.removeProductFromBasket(); break;
-                case "3": customerFunctions.productsInBasket(); break;
-                case "4": customerFunctions.submitOrder(); break;
-                case "5": break;
-                case "6": customerFunctions.displayCustomerData(loggedInEmail); break;
+                case "1": customerFunctions.addProductToYourBasket() ;break;
+                case "2": customerFunctions.removeProductFromBasket() ;break;
+                case "3": customerFunctions.productsInBasket() ;break;
+                case "4": customerFunctions.submitOrder() ;break;
+                case "5": customerFunctions.displayOrdersHistory(loggedInEmail) ;break;
+                case "6": customerFunctions.displayCustomerData(loggedInEmail) ;break;
+                case "7": customerFunctions.changeAccountData(loggedInEmail) ;break;
                 case "0": break;
                 default:
                     System.out.println("Bad choice, try again");
