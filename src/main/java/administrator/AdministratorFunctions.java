@@ -8,6 +8,7 @@ import products.Category;
 import products.Order;
 import products.Product;
 import products.Status;
+
 import java.util.Collection;
 import java.util.Scanner;
 
@@ -25,6 +26,7 @@ public class AdministratorFunctions {
     public void createCategory() {
         Scanner scanner = new Scanner(System.in);
         String choice;
+
         do {
             System.out.println("New category yes/no");
             choice = scanner.nextLine();
@@ -33,7 +35,7 @@ public class AdministratorFunctions {
                     System.out.println("Category name:");
                     String name = scanner.nextLine();
                     Category category = new Category(null, name);
-                    administratorRepository.addCategoryToDatabase(category);
+                    administratorRepository.saveCategoryToDatabase(category);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -44,6 +46,7 @@ public class AdministratorFunctions {
     public void deleteCategory() {
         Scanner scanner = new Scanner(System.in);
         String choice;
+
         do {
             System.out.println("Delete category yes/no");
             choice = scanner.nextLine();
@@ -115,9 +118,10 @@ public class AdministratorFunctions {
         } while (!choice.equalsIgnoreCase("yes"));
     }
 
-    public void deleteProduct() {
+    public void deleteProductFromStore() {
         Scanner scanner = new Scanner(System.in);
         String choice;
+
         do {
             System.out.println("Delete product yes/no");
             choice = scanner.nextLine();
@@ -142,6 +146,7 @@ public class AdministratorFunctions {
     public void modifyProductData() {
         Scanner scanner = new Scanner(System.in);
         String choice;
+
         do {
             System.out.println("Modify product yes/no");
             choice = scanner.nextLine();
@@ -153,44 +158,44 @@ public class AdministratorFunctions {
                         System.out.println("Bad type try again");
                         scanner.next();
                     }
-                    int id_product = scanner.nextInt();
+                    int idProduct = scanner.nextInt();
                     scanner.nextLine();
+                    if (commonFunctions.productExists(idProduct)) {
+                        System.out.println("Enter the new name:");
+                        String name = scanner.nextLine();
 
-                    System.out.println("Enter the new name:");
-                    String name = scanner.nextLine();
+                        System.out.println("Enter the new price:");
+                        while (!scanner.hasNextDouble()) {
+                            System.out.println("Give a number.");
+                            scanner.next();
+                        }
+                        double price = scanner.nextDouble();
 
-                    System.out.println("Enter the new price:");
-                    while (!scanner.hasNextDouble()) {
-                        System.out.println("Give a number.");
-                        scanner.next();
-                    }
-                    double price = scanner.nextDouble();
-
-                    System.out.println("Enter the new quantity:");
-                    while (!scanner.hasNextInt()) {
-                        System.out.println("Give a number");
-                        scanner.next();
-                    }
-                    int quantity = scanner.nextInt();
-
-                    System.out.println("Enter the new category ID:");
-                    boolean correctCategory = false;
-                    while (!correctCategory) {
-                        commonFunctions.displayCategories();
+                        System.out.println("Enter the new quantity:");
                         while (!scanner.hasNextInt()) {
                             System.out.println("Give a number");
                             scanner.next();
                         }
-                        int id_category = scanner.nextInt();
-                        scanner.nextLine();
-                        if (categoryExists(id_category)) {
-                            administratorRepository.modifyProductsColumn(id_product, name, price, quantity, id_category);
-                            correctCategory = true;
-                        } else {
-                            System.out.println("Category does not exist");
-                        }
-                    }
+                        int quantity = scanner.nextInt();
 
+                        System.out.println("Enter the new category ID:");
+                        boolean correctCategory = false;
+                        while (!correctCategory) {
+                            commonFunctions.displayCategories();
+                            while (!scanner.hasNextInt()) {
+                                System.out.println("Give a number");
+                                scanner.next();
+                            }
+                            int idCategory = scanner.nextInt();
+                            scanner.nextLine();
+                            if (categoryExists(idCategory)) {
+                                administratorRepository.modifyProductsColumn(idProduct, name, price, quantity, idCategory);
+                                correctCategory = true;
+                            } else {
+                                System.out.println("Category does not exist");
+                            }
+                        }
+                    } else System.out.println("Product does not exist");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -205,24 +210,26 @@ public class AdministratorFunctions {
         do {
             System.out.println("Send order yes/no");
             choice = scanner.nextLine();
-            if (choice.equalsIgnoreCase("yes")) {
-                displayOrders();
-                try {
-                    System.out.println("Id product: ");
-                    while (!scanner.hasNextInt()) {
-                        System.out.println("Bad type try again");
-                        scanner.next();
-                    }
-                    int idOrders = scanner.nextInt();
-                    scanner.nextLine();
-                    administratorRepository.updateOrderStatus(idOrders, Status.SENT);
+            if (ordersExists()) {
+                if (choice.equalsIgnoreCase("yes")) {
+                    displayOrders();
+                    try {
+                        System.out.println("Id product: ");
+                        while (!scanner.hasNextInt()) {
+                            System.out.println("Bad type try again");
+                            scanner.next();
+                        }
+                        int idOrders = scanner.nextInt();
+                        scanner.nextLine();
+                        administratorRepository.updateOrderStatus(idOrders, Status.SENT);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
-        } while (!choice.equalsIgnoreCase("yes"));
+        } while (!choice.equalsIgnoreCase("no"));
     }
 
     public void displayOrders() {
@@ -235,7 +242,7 @@ public class AdministratorFunctions {
     public void displayCustomers() {
         Collection<Customer> customers = commonRepository.loadCustomersFromDatabase();
         for (Customer customer : customers) {
-            System.out.println(customer.toStringForAdministrator());
+            System.out.println(customer);
         }
     }
 
@@ -253,6 +260,15 @@ public class AdministratorFunctions {
         Collection<Category> categories = commonRepository.loadCategoriesFromDatabase();
         if (categories.isEmpty()) {
             System.out.println("First create category");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean ordersExists() {
+        Collection<Order> orders = administratorRepository.loadOrders();
+        if (orders.isEmpty()) {
+            System.out.println("There are no orders");
             return false;
         }
         return true;

@@ -55,7 +55,13 @@ public class Database implements AutoCloseable {
                 "password TEXT," +
                 "email TEXT" +
                 ");");
-
+        sqlTable.add("CREATE TABLE IF NOT EXISTS Basket (" +
+                "basket_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "id_product INTEGER," +
+                "name TEXT ," +
+                "price REAL," +
+                "quantity INTEGER" +
+                ");");
 
         for (String sql : sqlTable) {
             try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql)) {

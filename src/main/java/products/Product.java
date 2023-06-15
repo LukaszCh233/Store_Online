@@ -27,8 +27,8 @@ public class Product {
 
     }
 
-
-    public String toStringForStore() {
+    @Override
+    public String toString() {
         return
                 "id: " + id_product +
                         " | name: " + name +
@@ -36,14 +36,6 @@ public class Product {
                         " | quantity: " + quantity +
                         " | " + status +
                         "\n---------------------------------------------------";
-    }
-
-    public String toStringForBasket() {
-        return "id: " + id_product +
-                " | name: " + name +
-                " | price: " + price + "zl" +
-                " | quantity: " + selectedQuantity +
-                "\n---------------------------------------------------";
     }
 
     @Override

@@ -5,6 +5,7 @@ import products.Category;
 import products.Order;
 import products.Product;
 import products.Status;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,22 +15,6 @@ public class AdministratorRepository {
 
     public AdministratorRepository(Database database) {
         this.database = database;
-    }
-
-    public static Product mapResultSetToProduct(ResultSet resultSet) throws SQLException {
-        Integer idProduct = resultSet.getInt(1);
-        String name = resultSet.getString(2);
-        Double price = resultSet.getDouble(3);
-        int quantity = resultSet.getInt(4);
-        Integer id_category = resultSet.getInt(5);
-        String statusString = resultSet.getString(6);
-        Status status;
-        if (statusString != null) {
-            status = Status.valueOf(resultSet.getString(6));
-        } else {
-            status = Status.AVAILABLE;
-        }
-        return new Product(idProduct, name, price, quantity, id_category, status);
     }
 
     public static Order mapResultSetToOrder(ResultSet resultSet) throws SQLException {
@@ -51,7 +36,7 @@ public class AdministratorRepository {
         return new Order(idOrder, idCustomer, orderData.toLocalDate(), price, status);
     }
 
-    public void addCategoryToDatabase(Category category) {
+    public void saveCategoryToDatabase(Category category) {
         String sql = "INSERT INTO Categories (name) VALUES (?)";
         try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
             preparedStatement.setString(1, category.getCategory());
@@ -74,19 +59,6 @@ public class AdministratorRepository {
         }
     }
 
-    public Collection<Product> loadProduct() {
-        Collection<Product> products = new ArrayList<>();
-        String sql = "SELECT * FROM Products";
-        try (Statement statement = database.getConnection().createStatement()) {
-            ResultSet resultSet = statement.executeQuery(sql);
-            while (resultSet.next()) {
-                products.add(mapResultSetToProduct(resultSet));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return products;
-    }
 
     public Collection<Order> loadOrders() {
         Collection<Order> orders = new ArrayList<>();
@@ -102,20 +74,6 @@ public class AdministratorRepository {
         return orders;
     }
 
-    public Collection<Product> loadSelectedCategoryProduct(int categoryId) {
-        Collection<Product> products = new ArrayList<>();
-        String sql = "SELECT * FROM Products WHERE id_category = ?";
-        try (PreparedStatement statement = database.getConnection().prepareStatement(sql)) {
-            statement.setInt(1, categoryId);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                products.add(mapResultSetToProduct(resultSet));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return products;
-    }
 
     public void removeProductFromDatabase(int id) {
         String sql = "DELETE FROM Products WHERE id_product = ?";

@@ -2,10 +2,10 @@ package interfaceStore;
 
 import administrator.AdministratorFunctions;
 import common.CommonFunctions;
-import customers.Customer;
 import customers.CustomerFunctions;
 import customers.CustomerRepository;
 import database.Database;
+
 import java.sql.SQLException;
 import java.util.Scanner;
 
@@ -15,7 +15,6 @@ public class StoreMenu implements AutoCloseable {
     CustomerFunctions customerFunctions;
     CustomerRepository customerRepository;
     CommonFunctions commonFunctions;
-    String loggedInEmail;
 
     public StoreMenu() throws SQLException {
         database = new Database();
@@ -29,7 +28,7 @@ public class StoreMenu implements AutoCloseable {
         Scanner scanner = new Scanner(System.in);
         String choice;
         while (true) {
-            System.out.println("Choose 1- admin 2- customer");
+            System.out.println(" 1- admin\n 2- customer");
             choice = scanner.nextLine();
             if (choice.equalsIgnoreCase("1")) {
                 administratorInterface();
@@ -53,71 +52,18 @@ public class StoreMenu implements AutoCloseable {
             }
             choice = scanner.nextInt();
             if (choice == 1) {
-                loginCustomer();
+                customerFunctions.loginCustomer();
                 correct = true;
+                customerInterface();
             } else if (choice == 2) {
-                registerCustomer();
+                customerFunctions.registerCustomer();
                 correct = true;
             } else System.out.println("Try again");
         }
     }
 
-    public void registerCustomer() {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Name:");
-        String name = scanner.nextLine();
-
-        System.out.println("Last Name:");
-        String lastName = scanner.nextLine();
-
-        System.out.println("Email:");
-        String email = scanner.nextLine();
-
-        System.out.println("Number:");
-        while (!scanner.hasNextInt()) {
-            System.out.println("Give a number");
-            scanner.next();
-        }
-        int number = scanner.nextInt();
-        scanner.nextLine();
-
-        System.out.println("Address:");
-        String address = scanner.nextLine();
-
-        System.out.println("Password:");
-        String password = scanner.nextLine();
-
-        Customer customer = new Customer(null, name, lastName, email, number, address, password);
-
-        customerRepository.saveCustomerToDatabase(customer);
-        System.out.println("Register finish");
-        customerInterface();
-    }
-
-    public void loginCustomer() {
-
-        Scanner scanner = new Scanner(System.in);
-
-        boolean loginSuccessful = false;
-        while (!loginSuccessful) {
-            System.out.println("Email:");
-            String email = scanner.nextLine();
-            System.out.println("Password:");
-            String password = scanner.nextLine();
-            loginSuccessful = customerRepository.login(email, password);
-            if (loginSuccessful) {
-                loggedInEmail = email;
-                customerRepository.getCustomerIdByEmail(email);
-                System.out.println("Login successful");
-                customerInterface();
-            } else {
-                System.out.println("Try again :)");
-            }
-        }
-    }
-
     public void administratorInterface() {
+
         Scanner scanner = new Scanner(System.in);
         String choice;
 
@@ -136,22 +82,21 @@ public class StoreMenu implements AutoCloseable {
             System.out.println("0: Close program");
             choice = scanner.nextLine();
             switch (choice) {
-                case "1": administratorFunctions.addProductToStore() ;break;
-                case "2": administratorFunctions.deleteProduct() ;break;
-                case "3": commonFunctions.displayProductsInStore() ;break;
-                case "4": administratorFunctions.modifyProductData() ;break;
-                case "5": administratorFunctions.displayOrders() ;break;
-                case "6": administratorFunctions.displayCustomers() ;break;
-                case "7": administratorFunctions.createCategory() ;break;
-                case "8": commonFunctions.displayCategories() ;break;
-                case "9": commonFunctions.productsInStore() ;break;
-                case "10": administratorFunctions.deleteCategory() ;break;
-                case "11": administratorFunctions.sendOrder() ;break;
-                case "0": break;
-                default:
-                    System.out.println("Bad choice, try again");
-
+                case "1" -> administratorFunctions.addProductToStore();
+                case "2" -> administratorFunctions.deleteProductFromStore();
+                case "3" -> commonFunctions.displayCategoryProductsInStore();
+                case "4" -> administratorFunctions.modifyProductData();
+                case "5" -> administratorFunctions.displayOrders();
+                case "6" -> administratorFunctions.displayCustomers();
+                case "7" -> administratorFunctions.createCategory();
+                case "8" -> commonFunctions.displayCategories();
+                case "9" -> commonFunctions.displayProductsInStore();
+                case "10" -> administratorFunctions.deleteCategory();
+                case "11" -> administratorFunctions.sendOrder();
+                case "0" -> System.out.println("EXIT");
+                default -> System.out.println("Bad choice, try again");
             }
+
         } while (!choice.equalsIgnoreCase("0"));
     }
 
@@ -169,17 +114,15 @@ public class StoreMenu implements AutoCloseable {
             System.out.println("0: Close program");
             choice = scanner.nextLine();
             switch (choice) {
-                case "1": customerFunctions.addProductToYourBasket() ;break;
-                case "2": customerFunctions.removeProductFromBasket() ;break;
-                case "3": customerFunctions.productsInBasket() ;break;
-                case "4": customerFunctions.submitOrder() ;break;
-                case "5": customerFunctions.displayOrdersHistory(loggedInEmail) ;break;
-                case "6": customerFunctions.displayCustomerData(loggedInEmail) ;break;
-                case "7": customerFunctions.changeAccountData(loggedInEmail) ;break;
-                case "0": break;
-                default:
-                    System.out.println("Bad choice, try again");
-
+                case "1" -> customerFunctions.addProductToBasket();
+                case "2" -> customerFunctions.removeProductFromBasket();
+                case "3" -> customerFunctions.displayProductsInBasket();
+                case "4" -> customerFunctions.submitOrder();
+                case "5" -> customerFunctions.displayOrdersHistory(customerFunctions.loggedInEmail);
+                case "6" -> customerFunctions.displayCustomerData(customerFunctions.loggedInEmail);
+                case "7" -> customerFunctions.changeAccountData(customerFunctions.loggedInEmail);
+                case "0" -> customerFunctions.returnProductsAndExit();
+                default -> System.out.println("Bad choice, try again");
             }
         } while (!choice.equalsIgnoreCase("0"));
     }

@@ -1,7 +1,5 @@
 package customers;
 
-import administrator.AdministratorFunctions;
-import administrator.AdministratorRepository;
 import common.CommonFunctions;
 import common.CommonRepository;
 import database.Database;
@@ -10,81 +8,157 @@ import products.Product;
 import products.Status;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Scanner;
 
 public class CustomerFunctions {
+    public String loggedInEmail;
     CustomerRepository customerRepository;
-    AdministratorFunctions administratorFunctions;
-    AdministratorRepository administratorRepository;
     CommonRepository commonRepository;
     CommonFunctions commonFunctions;
-    Collection<Product> productsInBasket = new ArrayList<>();
 
     public CustomerFunctions(Database database) {
         this.customerRepository = new CustomerRepository(database);
-        this.administratorFunctions = new AdministratorFunctions(database);
-        this.administratorRepository = new AdministratorRepository(database);
         this.commonRepository = new CommonRepository(database);
         this.commonFunctions = new CommonFunctions(database);
 
     }
 
-    public void addProductToYourBasket() {
+    public void registerCustomer() {
+
+        Scanner scanner = new Scanner(System.in);
+        String choice;
+        do {
+            try {
+                System.out.println("Name:");
+                String name = scanner.nextLine();
+
+                System.out.println("Last Name:");
+                String lastName = scanner.nextLine();
+
+                System.out.println("Email:");
+                String email = scanner.nextLine();
+
+                System.out.println("Number:");
+                while (!scanner.hasNextInt()) {
+                    System.out.println("Give a number");
+                    scanner.next();
+                }
+                int number = scanner.nextInt();
+                scanner.nextLine();
+
+                System.out.println("Address:");
+                String address = scanner.nextLine();
+
+                System.out.println("Password:");
+                String password = scanner.nextLine();
+
+                Customer customer = new Customer(null, name, lastName, email, number, address, password);
+
+                customerRepository.saveCustomerToDatabase(customer);
+                System.out.println("Register finish\n Now You can login");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.out.println("Back to menu yes/no");
+            choice = scanner.nextLine();
+
+        } while (!choice.equalsIgnoreCase("yes"));
+
+    }
+
+    public void loginCustomer() {
+
+        Scanner scanner = new Scanner(System.in);
+        boolean loginSuccessful = false;
+
+        while (!loginSuccessful) {
+            try {
+                System.out.println("Email:");
+                String email = scanner.nextLine();
+                System.out.println("Password:");
+                String password = scanner.nextLine();
+
+                loginSuccessful = customerRepository.login(email, password);
+                if (loginSuccessful) {
+                    loggedInEmail = email;
+                    customerRepository.getCustomerIdByEmail(email);
+                    System.out.println("Login successful");
+                } else {
+                    System.out.println("Try again :)");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void addProductToBasket() {
         Scanner scanner = new Scanner(System.in);
         String choice;
 
         do {
-            commonFunctions.productsInStore();
-            while (!scanner.hasNextInt()) {
-                System.out.println("Give a number");
-                scanner.next();
-            }
-            int idProduct = scanner.nextInt();
-            scanner.nextLine();
-            if (productExists(idProduct)) {
-                Product selectedProduct = getProductById(idProduct);
-                System.out.println("Quantity:");
+            try {
+                commonFunctions.displayCategoryProductsInStore();
+                System.out.println("Id product:");
                 while (!scanner.hasNextInt()) {
-                    System.out.println("Bad type try again");
+                    System.out.println("Give a number");
                     scanner.next();
                 }
-                int quantity = scanner.nextInt();
+                int idProduct = scanner.nextInt();
                 scanner.nextLine();
-                if (quantity > selectedProduct.getQuantity()) {
-                    System.out.println("product quantity not available");
-                } else if (quantity > 0) {
-                    selectedProduct.setSelectedQuantity(quantity);
-                    selectedProduct.setQuantity(selectedProduct.getQuantity() - quantity);
-                    productsInBasket.add(selectedProduct);
-                    customerRepository.updateProductQuantityInDatabase(idProduct, selectedProduct.getQuantity());
-                    System.out.println("Product added to basket");
+                if (commonFunctions.productExists(idProduct)) {
+                    Product selectedProduct = getProductById(idProduct);
+                    System.out.println("Quantity:");
+                    while (!scanner.hasNextInt()) {
+                        System.out.println("Bad type try again");
+                        scanner.next();
+                    }
+                    int quantity = scanner.nextInt();
+                    scanner.nextLine();
+
+                    if (quantity > selectedProduct.getQuantity()) {
+                        System.out.println("product quantity not available");
+                    } else if (quantity > 0) {
+                        if (existInBasket(idProduct)) {
+                            int actualQuantity = getProductQuantityInBasket(idProduct);
+                            selectedProduct.setQuantity(selectedProduct.getQuantity() - quantity);
+                            customerRepository.updateQuantityInBasket(idProduct, quantity + actualQuantity);
+                        } else {
+
+                            selectedProduct.setSelectedQuantity(quantity);
+                            selectedProduct.setQuantity(selectedProduct.getQuantity() - quantity);
+                            Basket basket = new Basket(null, idProduct, selectedProduct.getName(), selectedProduct.getPrice(), selectedProduct.getSelectedQuantity());
+                            customerRepository.saveProductToBasketDatabase(basket);
+                        }
+                        customerRepository.updateProductQuantityInDatabase(idProduct, selectedProduct.getQuantity());
+                        System.out.println("Product added to basket");
+                    }
+                } else {
+                    System.out.println("Bad id, try again");
                 }
-            } else {
-                System.out.println("Bad id, try again");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             System.out.println("Back to menu yes/no");
             choice = scanner.nextLine();
         } while (!choice.equalsIgnoreCase("yes"));
     }
 
-    public void productsInBasket() {
-
-        System.out.println("Products:");
-        for (Product product : productsInBasket) {
-
-            System.out.println(product.toStringForBasket());
+    public void displayProductsInBasket() {
+        Collection<Basket> basket = customerRepository.loadBasketFromDatabase();
+        for (Basket basketProduct : basket) {
+            System.out.println(basketProduct);
         }
         double totalPrice = calculateBasketTotalPrice();
         System.out.println("Total Price: " + totalPrice);
     }
 
     public double calculateBasketTotalPrice() {
+        Collection<Basket> basket = customerRepository.loadBasketFromDatabase();
         double totalPrice = 0.0;
-        for (Product product : productsInBasket) {
-            totalPrice = totalPrice + product.getPrice() * product.getSelectedQuantity();
+        for (Basket basketProduct : basket) {
+            totalPrice = totalPrice + basketProduct.getPrice() * basketProduct.getQuantity();
         }
         return totalPrice;
     }
@@ -92,37 +166,43 @@ public class CustomerFunctions {
     public void removeProductFromBasket() {
         Scanner scanner = new Scanner(System.in);
         String choice;
-        if (productsInBasket.isEmpty()) {
-            System.out.println("Basket is empty");
-            return;
-        }
+
         do {
             System.out.println("Remove product yes/no");
             choice = scanner.nextLine();
+            if (!checkBasket()) {
+                continue;
+            }
             if (choice.equalsIgnoreCase("yes")) {
-                productsInBasket();
+                displayProductsInBasket();
                 try {
                     System.out.println("Id product: ");
                     int id = scanner.nextInt();
                     scanner.nextLine();
-                    if (productExistsInBasket(id)) {
-                        int quantityInBasket = getProductQuantityInBasket(id);
-                        Product removeProduct = getProductById(id);
-                        System.out.println("Quantity:");
-                        int quantity = scanner.nextInt();
-                        removeProduct.setSelectedQuantity(quantity);
-
-                        if (quantity < removeProduct.getSelectedQuantity()) {
-                            removeProduct.setSelectedQuantity(removeProduct.getSelectedQuantity() - quantity);
-                            removeProduct.setQuantity(removeProduct.getQuantity() + quantity);
-                            customerRepository.updateProductQuantityInDatabase(id, removeProduct.getQuantity());
-                        } else {
-                            removeProduct.setQuantity(removeProduct.getQuantity() + quantity);
-                            removeProductById(id);
-                            customerRepository.updateProductQuantityInDatabase(id, removeProduct.getQuantity());
-                            System.out.println("Product delete");
-                        }
+                    if (!existInBasket(idProduct)) {
+                        System.out.println("Product does not exist ");
+                        continue;
                     }
+                    System.out.println("Quantity:");
+                    while (!scanner.hasNextInt()) {
+                        System.out.println("Bad type try again");
+                        scanner.next();
+                    }
+                    int quantity = scanner.nextInt();
+                    scanner.nextLine();
+                    Product selectedProduct = getProductById(idProduct);
+                    int actualQuantity = getProductQuantityInBasket(idProduct) - quantity;
+
+
+                    selectedProduct.setQuantity(selectedProduct.getQuantity() + quantity);
+                    customerRepository.updateProductQuantityInDatabase(idProduct, selectedProduct.getQuantity());
+                    customerRepository.updateQuantityInBasket(idProduct, actualQuantity);
+                    if (actualQuantity <= 0) {
+                        customerRepository.removeProductFromBasketDatabase(idProduct);
+                        System.out.println("Product deleted");
+                    }
+
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -131,61 +211,47 @@ public class CustomerFunctions {
     }
 
     public int getProductQuantityInBasket(int productId) {
-        for (Product product : productsInBasket) {
+        Collection<Basket> basket = customerRepository.loadBasketFromDatabase();
+        for (Basket product : basket) {
             if (product.getId_product() == productId) {
-                return product.getSelectedQuantity();
+                return product.getQuantity();
             }
         }
         return 0;
     }
 
-    boolean productExistsInBasket(int id) {
-        for (Product product : productsInBasket) {
-            if (product.getId_product() == id) {
+    private boolean existInBasket(int productId) {
+        Collection<Basket> basket = customerRepository.loadBasketFromDatabase();
+        for (Basket product : basket) {
+            if (product.getId_product() == productId) {
                 return true;
             }
         }
         return false;
     }
 
-    public void removeProductById(int id) {
-        Iterator<Product> iterator = productsInBasket.iterator();
-        while (iterator.hasNext()) {
-            Product product = iterator.next();
-            if (product.getId_product() == id) {
-                iterator.remove();
-                break;
-            }
-        }
-    }
 
     public void submitOrder() {
         Scanner scanner = new Scanner(System.in);
-        String choice;
-
-        if (productsInBasket.isEmpty()) {
-            System.out.println("Basket is empty");
+        Collection<Basket> basket = customerRepository.loadBasketFromDatabase();
+        if (basket.isEmpty()) {
+            System.out.println("Your basket is empty\n");
             return;
         }
-        do {
-            System.out.println("Do you want submit order? yes/no");
-            choice = scanner.nextLine();
-            if (choice.equalsIgnoreCase("yes")) {
-                productsInBasket();
-                System.out.println("Your email:");
-                String email = scanner.nextLine();
-                int idCustomer = customerRepository.getCustomerIdByEmail(email);
-                if (idCustomer != -1) {
-                    LocalDate orderData = LocalDate.now();
-
-                    Order order = new Order(null, idCustomer, orderData, calculateBasketTotalPrice(), Status.ORDERED);
-
-                    customerRepository.saveOrderToDatabase(order);
-                    productsInBasket.clear();
-                }
-            }
-
-        } while (!choice.equalsIgnoreCase("no"));
+        while (!basket.isEmpty()) {
+            displayProductsInBasket();
+            System.out.println("Your email:");
+            String email = scanner.nextLine();
+            int idCustomer = customerRepository.getCustomerIdByEmail(email);
+            if (idCustomer != -1) {
+                LocalDate orderData = LocalDate.now();
+                Order order = new Order(null, idCustomer, orderData, calculateBasketTotalPrice(), Status.ORDERED);
+                customerRepository.saveOrderToDatabase(order);
+                customerRepository.clearBasketDatabase();
+                System.out.println("Ordered");
+                break;
+            } else System.out.println("Bad email");
+        }
     }
 
     public void changeAccountData(String loggedEmail) {
@@ -198,15 +264,13 @@ public class CustomerFunctions {
             choice = scanner.nextLine();
             if (choice.equalsIgnoreCase("yes")) {
                 displayCustomerData(loggedEmail);
-
                 try {
-                    System.out.println("Modify password&email - 1\n basic data - 2 ");
+                    System.out.println("Modify:\n 1 - password and email\n 2 - basic data");
                     int whatModify = scanner.nextInt();
                     scanner.nextLine();
                     if (whatModify == 2) {
                         System.out.println("Name:");
                         String name = scanner.nextLine();
-                        scanner.nextLine();
 
                         System.out.println("LastName:");
                         String lastName = scanner.nextLine();
@@ -231,6 +295,7 @@ public class CustomerFunctions {
                         String password = scanner.nextLine();
 
                         customerRepository.modifyCustomersPasswordColumnInDatabase(customerId, email, password);
+                        System.out.println("Now please log in again\n");
                     } else System.out.println("Try again");
 
                 } catch (Exception e) {
@@ -241,18 +306,8 @@ public class CustomerFunctions {
         } while (!choice.equalsIgnoreCase("yes"));
     }
 
-    public boolean productExists(int idProduct) {
-        Collection<Product> products = administratorRepository.loadProduct();
-        for (Product product : products) {
-            if (product.getId_product() == idProduct) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public Product getProductById(int id) {
-        Collection<Product> products = administratorRepository.loadProduct();
+        Collection<Product> products = commonRepository.loadProduct();
         for (Product product : products) {
             if (product.getId_product() == id) {
                 return product;
@@ -287,7 +342,7 @@ public class CustomerFunctions {
         if (customerId != -1) {
             Customer loggedCustomer = getCustomerById(customerId);
             if (loggedCustomer != null) {
-                System.out.println(loggedCustomer.toStringForCustomer());
+                System.out.println(loggedCustomer);
             } else {
                 System.out.println("Customer not found.");
             }
@@ -308,8 +363,29 @@ public class CustomerFunctions {
             System.out.println("Customer not found.");
         }
     }
-}
 
+    public void returnProductsAndExit() {
+        Collection<Basket> basket = customerRepository.loadBasketFromDatabase();
+
+        for (Basket basketItem : basket) {
+            int productId = basketItem.getId_product();
+            Product selectedProduct = getProductById(productId);
+            int quantity = basketItem.getQuantity();
+            selectedProduct.setQuantity(selectedProduct.getQuantity() + quantity);
+            customerRepository.updateProductQuantityInDatabase(productId, selectedProduct.getQuantity());
+        }
+        customerRepository.clearBasketDatabase();
+    }
+
+    private boolean checkBasket() {
+        Collection<Basket> basket = customerRepository.loadBasketFromDatabase();
+        if (basket.isEmpty()) {
+            System.out.println("Basket is empty");
+            return false;
+        }
+        return true;
+    }
+}
 
 
 

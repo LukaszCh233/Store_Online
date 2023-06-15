@@ -5,6 +5,8 @@ import database.Database;
 import products.Category;
 import products.Product;
 import products.Status;
+
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -85,6 +87,21 @@ public class CommonRepository {
         String sql = "SELECT * FROM Products";
         try (Statement statement = database.getConnection().createStatement()) {
             ResultSet resultSet = statement.executeQuery(sql);
+            while (resultSet.next()) {
+                products.add(mapResultSetToProduct(resultSet));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
+
+    public Collection<Product> loadSelectedCategoryProduct(int categoryId) {
+        Collection<Product> products = new ArrayList<>();
+        String sql = "SELECT * FROM Products WHERE id_category = ?";
+        try (PreparedStatement statement = database.getConnection().prepareStatement(sql)) {
+            statement.setInt(1, categoryId);
+            ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 products.add(mapResultSetToProduct(resultSet));
             }

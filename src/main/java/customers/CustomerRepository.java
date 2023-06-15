@@ -3,10 +3,8 @@ package customers;
 import database.Database;
 import products.Order;
 import products.Status;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -35,6 +33,17 @@ public class CustomerRepository {
         }
         return new Order(idOrder, idCustomer, orderData.toLocalDate(), price, status);
     }
+
+    public static Basket mapResultSetToBasket(ResultSet resultSet) throws SQLException {
+        Integer idBasket = resultSet.getInt(1);
+        Integer idProduct = resultSet.getInt(2);
+        String name = resultSet.getString(3);
+        double price = resultSet.getDouble(4);
+        int quantity = resultSet.getInt(5);
+
+        return new Basket(idBasket, idProduct, name, price, quantity);
+    }
+
 
     public void updateProductQuantityInDatabase(int productId, int quantity) {
         String sql = "UPDATE Products SET quantity = ? WHERE id_product = ?";
@@ -77,8 +86,8 @@ public class CustomerRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        String query = "INSERT INTO Customers_password (password, email) VALUES ( ?, ?)";
-        try (PreparedStatement statement = database.getConnection().prepareStatement(query)) {
+        String sql1 = "INSERT INTO Customers_password (password, email) VALUES ( ?, ?)";
+        try (PreparedStatement statement = database.getConnection().prepareStatement(sql1)) {
             statement.setString(1, customer.password);
             statement.setString(2, customer.email);
             statement.executeUpdate();
@@ -114,21 +123,30 @@ public class CustomerRepository {
             preparedStatement.setString(2, lastName);
             preparedStatement.setInt(3, number);
             preparedStatement.setString(4, address);
-            preparedStatement.setInt(5,idCustomer);
+            preparedStatement.setInt(5, idCustomer);
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    public void modifyCustomersPasswordColumnInDatabase(int idCustomer,String email,String password) {
+
+    public void modifyCustomersPasswordColumnInDatabase(int idCustomer, String email, String password) {
         String sql = "UPDATE Customers_password SET email = ?, password = ? WHERE customer_id = ?";
         try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
             preparedStatement.setString(1, email);
-            preparedStatement.setString(2,password);
-            preparedStatement.setInt(3,idCustomer);
+            preparedStatement.setString(2, password);
+            preparedStatement.setInt(3, idCustomer);
 
             preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        String passwordSql = "UPDATE Customers SET email = ? WHERE id_customer = ?";
+        try (PreparedStatement passwordStatement = database.getConnection().prepareStatement(passwordSql)) {
+            passwordStatement.setString(1, email);
+            passwordStatement.setInt(2, idCustomer);
+            passwordStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -161,5 +179,62 @@ public class CustomerRepository {
             e.printStackTrace();
         }
         return orders;
+    }
+
+    public void saveProductToBasketDatabase(Basket basketProduct) {
+        String sql = "INSERT INTO Basket (id_product,name,price,quantity) VALUES (?,?,?,?)";
+        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
+            preparedStatement.setInt(1, basketProduct.getId_product());
+            preparedStatement.setString(2, basketProduct.getName());
+            preparedStatement.setDouble(3, basketProduct.getPrice());
+            preparedStatement.setInt(4, basketProduct.getQuantity());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Collection<Basket> loadBasketFromDatabase() {
+        Collection<Basket> basket = new ArrayList<>();
+        String sql = "SELECT * FROM Basket";
+        try (Statement statement = database.getConnection().createStatement()) {
+            ResultSet resultSet = statement.executeQuery(sql);
+            while (resultSet.next()) {
+                basket.add(mapResultSetToBasket(resultSet));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return basket;
+    }
+
+    public void removeProductFromBasketDatabase(int id) {
+        String sql = "DELETE FROM Basket WHERE id_product = ?";
+        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
+            preparedStatement.setInt(1, id);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateQuantityInBasket(int id, int quantity) {
+        String sql = "UPDATE Basket SET  quantity = ? WHERE id_product = ?";
+        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
+            preparedStatement.setInt(1, quantity);
+            preparedStatement.setInt(2, id);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void clearBasketDatabase() {
+        String sql = "DELETE FROM Basket WHERE 1=1";
+        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
