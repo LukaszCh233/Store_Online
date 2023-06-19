@@ -5,5 +5,4 @@ public enum Status {
     AVAILABLE,
     ORDERED,
     SENT
-
 }

@@ -6,7 +6,6 @@ import database.Database;
 import products.Order;
 import products.Product;
 import products.Status;
-
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Scanner;
@@ -64,7 +63,6 @@ public class CustomerFunctions {
             choice = scanner.nextLine();
 
         } while (!choice.equalsIgnoreCase("yes"));
-
     }
 
     public void loginCustomer() {
@@ -94,55 +92,60 @@ public class CustomerFunctions {
     }
 
     public void addProductToBasket() {
+
         Scanner scanner = new Scanner(System.in);
         String choice;
 
         do {
-            try {
-                commonFunctions.displayCategoryProductsInStore();
-                System.out.println("Id product:");
-                while (!scanner.hasNextInt()) {
-                    System.out.println("Give a number");
-                    scanner.next();
-                }
-                int idProduct = scanner.nextInt();
-                scanner.nextLine();
-                if (commonFunctions.productExists(idProduct)) {
-                    Product selectedProduct = getProductById(idProduct);
-                    System.out.println("Quantity:");
+            System.out.println("Add new product yes/no");
+            choice = scanner.nextLine();
+            if (choice.equalsIgnoreCase("yes")) {
+                try {
+                    commonFunctions.displayCategoryProductsInStore();
+                    System.out.println("Id product:");
                     while (!scanner.hasNextInt()) {
-                        System.out.println("Bad type try again");
+                        System.out.println("Give a number");
                         scanner.next();
                     }
-                    int quantity = scanner.nextInt();
+                    int idProduct = scanner.nextInt();
                     scanner.nextLine();
+                    if (commonFunctions.productExists(idProduct)) {
+                        Product selectedProduct = getProductById(idProduct);
 
-                    if (quantity > selectedProduct.getQuantity()) {
-                        System.out.println("product quantity not available");
-                    } else if (quantity > 0) {
-                        if (existInBasket(idProduct)) {
-                            int actualQuantity = getProductQuantityInBasket(idProduct);
-                            selectedProduct.setQuantity(selectedProduct.getQuantity() - quantity);
-                            customerRepository.updateQuantityInBasket(idProduct, quantity + actualQuantity);
-                        } else {
-
-                            selectedProduct.setSelectedQuantity(quantity);
-                            selectedProduct.setQuantity(selectedProduct.getQuantity() - quantity);
-                            Basket basket = new Basket(null, idProduct, selectedProduct.getName(), selectedProduct.getPrice(), selectedProduct.getSelectedQuantity());
-                            customerRepository.saveProductToBasketDatabase(basket);
+                        System.out.println("Quantity:");
+                        while (!scanner.hasNextInt()) {
+                            System.out.println("Bad type try again");
+                            scanner.next();
                         }
-                        customerRepository.updateProductQuantityInDatabase(idProduct, selectedProduct.getQuantity());
-                        System.out.println("Product added to basket");
+                        int quantity = scanner.nextInt();
+                        scanner.nextLine();
+
+                        if (quantity > selectedProduct.getQuantity()) {
+                            System.out.println("product quantity not available");
+                        } else if (quantity > 0) {
+                            if (existInBasket(idProduct)) {
+                                int actualQuantity = getProductQuantityInBasket(idProduct);
+                                selectedProduct.setQuantity(selectedProduct.getQuantity() - quantity);
+                                customerRepository.updateQuantityInBasket(idProduct, quantity + actualQuantity);
+                            } else {
+
+                                selectedProduct.setSelectedQuantity(quantity);
+                                selectedProduct.setQuantity(selectedProduct.getQuantity() - quantity);
+                                Basket basket = new Basket(null, idProduct, selectedProduct.getName(), selectedProduct.getPrice(), selectedProduct.getSelectedQuantity());
+                                customerRepository.saveProductToBasketDatabase(basket);
+                            }
+                            customerRepository.updateProductQuantityInDatabase(idProduct, selectedProduct.getQuantity());
+                            System.out.println("Product added to basket");
+                        }
+                    } else {
+                        System.out.println("Bad id, try again");
                     }
-                } else {
-                    System.out.println("Bad id, try again");
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-            System.out.println("Back to menu yes/no");
-            choice = scanner.nextLine();
-        } while (!choice.equalsIgnoreCase("yes"));
+
+        } while (!choice.equalsIgnoreCase("no"));
     }
 
     public void displayProductsInBasket() {
@@ -151,7 +154,7 @@ public class CustomerFunctions {
             System.out.println(basketProduct);
         }
         double totalPrice = calculateBasketTotalPrice();
-        System.out.println("Total Price: " + totalPrice);
+        System.out.println("Total Price: " + totalPrice + " zl");
     }
 
     public double calculateBasketTotalPrice() {
@@ -193,7 +196,6 @@ public class CustomerFunctions {
                     Product selectedProduct = getProductById(idProduct);
                     int actualQuantity = getProductQuantityInBasket(idProduct) - quantity;
 
-
                     selectedProduct.setQuantity(selectedProduct.getQuantity() + quantity);
                     customerRepository.updateProductQuantityInDatabase(idProduct, selectedProduct.getQuantity());
                     customerRepository.updateQuantityInBasket(idProduct, actualQuantity);
@@ -201,8 +203,6 @@ public class CustomerFunctions {
                         customerRepository.removeProductFromBasketDatabase(idProduct);
                         System.out.println("Product deleted");
                     }
-
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -307,7 +307,7 @@ public class CustomerFunctions {
     }
 
     public Product getProductById(int id) {
-        Collection<Product> products = commonRepository.loadProduct();
+        Collection<Product> products = commonRepository.loadProductFromDatabase();
         for (Product product : products) {
             if (product.getId_product() == id) {
                 return product;
@@ -327,7 +327,7 @@ public class CustomerFunctions {
     }
 
     public Order getOrdersById(int id) {
-        Collection<Order> allOrders = customerRepository.loadOrders(id);
+        Collection<Order> allOrders = customerRepository.loadOrderFromDatabase(id);
 
         for (Order order : allOrders) {
             if (order.getIdCustomer() == id) {
@@ -342,7 +342,7 @@ public class CustomerFunctions {
         if (customerId != -1) {
             Customer loggedCustomer = getCustomerById(customerId);
             if (loggedCustomer != null) {
-                System.out.println(loggedCustomer);
+                System.out.println(loggedCustomer.toStringForCustomer());
             } else {
                 System.out.println("Customer not found.");
             }

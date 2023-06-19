@@ -5,7 +5,6 @@ import common.CommonFunctions;
 import customers.CustomerFunctions;
 import customers.CustomerRepository;
 import database.Database;
-
 import java.sql.SQLException;
 import java.util.Scanner;
 

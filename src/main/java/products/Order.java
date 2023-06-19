@@ -15,7 +15,6 @@ public class Order {
     Double price;
     Status status;
 
-
     public Order(Integer idOrder, Integer idCustomer, LocalDate orderData, Double price, Status status) {
         this.idOrder = idOrder;
         this.idCustomer = idCustomer;

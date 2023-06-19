@@ -49,7 +49,7 @@ public class CommonRepository {
         String email = resultSet.getString(4);
         int number = resultSet.getInt(5);
         String address = resultSet.getString(6);
-        String password = resultSet.getString(7);
+        String password = resultSet.getString(8);
 
         return new Customer(idCustomer, name, lastName, email, number, address, password);
     }
@@ -82,7 +82,7 @@ public class CommonRepository {
         return customers;
     }
 
-    public Collection<Product> loadProduct() {
+    public Collection<Product> loadProductFromDatabase() {
         Collection<Product> products = new ArrayList<>();
         String sql = "SELECT * FROM Products";
         try (Statement statement = database.getConnection().createStatement()) {

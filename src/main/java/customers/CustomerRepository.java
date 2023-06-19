@@ -3,7 +3,6 @@ package customers;
 import database.Database;
 import products.Order;
 import products.Status;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,7 +42,6 @@ public class CustomerRepository {
 
         return new Basket(idBasket, idProduct, name, price, quantity);
     }
-
 
     public void updateProductQuantityInDatabase(int productId, int quantity) {
         String sql = "UPDATE Products SET quantity = ? WHERE id_product = ?";
@@ -86,7 +84,7 @@ public class CustomerRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        String sql1 = "INSERT INTO Customers_password (password, email) VALUES ( ?, ?)";
+        String sql1 = "INSERT INTO Customers_password (password, email) VALUES (?, ?)";
         try (PreparedStatement statement = database.getConnection().prepareStatement(sql1)) {
             statement.setString(1, customer.password);
             statement.setString(2, customer.email);
@@ -166,7 +164,7 @@ public class CustomerRepository {
         return -1;
     }
 
-    public Collection<Order> loadOrders(int id) {
+    public Collection<Order> loadOrderFromDatabase(int id) {
         Collection<Order> orders = new ArrayList<>();
         String sql = " SELECT * FROM Orders WHERE id_customer = ?";
         try (PreparedStatement statement = database.getConnection().prepareStatement(sql)) {

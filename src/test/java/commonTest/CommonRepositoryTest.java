@@ -86,7 +86,7 @@ public class CommonRepositoryTest {
         administratorRepository.saveProduct(product1);
 
         //then
-        Collection<Product> products = commonRepository.loadProduct();
+        Collection<Product> products = commonRepository.loadProductFromDatabase();
         Assertions.assertEquals(2, products.size());
         Assertions.assertTrue(products.contains(product));
         Assertions.assertTrue(products.contains(product1));

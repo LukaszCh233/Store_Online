@@ -27,8 +27,7 @@ public class Customer {
 
     }
 
-    @Override
-    public String toString() {
+    public String toStringForCustomer() {
         return "id: " + id_customer +
                 " | Name: " + name +
                 " | Last Name: " + lastName +
@@ -36,6 +35,15 @@ public class Customer {
                 " | Number: " + number +
                 " | Address: " + address +
                 " | Password: " + password +
+                "\n------------------------------------------------------------------------------------";
+    }
+    public String toStringForAdministrator() {
+        return "id: " + id_customer +
+                " | Name: " + name +
+                " | Last Name: " + lastName +
+                " | Email: " + email +
+                " | Number: " + number +
+                " | Address: " + address +
                 "\n------------------------------------------------------------------------------------";
     }
 

@@ -68,7 +68,7 @@ public class AdministratorRepositoryTest {
         administratorRepository.saveProduct(product);
 
         // then
-        Collection<Product> products = commonRepository.loadProduct();
+        Collection<Product> products = commonRepository.loadProductFromDatabase();
         Product foundProduct = new ArrayList<>(products).get(0);
         Assertions.assertEquals(1, products.size());
         Assertions.assertEquals("ball", foundProduct.getName());
@@ -87,7 +87,7 @@ public class AdministratorRepositoryTest {
         customerRepository.saveOrderToDatabase(order1);
 
         // when
-        Collection<Order> orders = administratorRepository.loadOrders();
+        Collection<Order> orders = administratorRepository.loadOrdersFromDatabase();
 
         // then
         Assertions.assertEquals(2, orders.size());
@@ -107,7 +107,7 @@ public class AdministratorRepositoryTest {
         administratorRepository.removeProductFromDatabase(product.getId_product());
 
         // then
-        Collection<Product> removeProduct = commonRepository.loadProduct();
+        Collection<Product> removeProduct = commonRepository.loadProductFromDatabase();
         Assertions.assertFalse(removeProduct.contains(product));
         Assertions.assertTrue(removeProduct.contains(product1));
     }
@@ -136,10 +136,10 @@ public class AdministratorRepositoryTest {
 
         // when
         administratorRepository.saveProduct(product);
-        administratorRepository.modifyProductsColumn(1, "newBall", 300.0, 5, 1);
+        administratorRepository.modifyProductsColumnInDatabase(1, "newBall", 300.0, 5, 1);
 
         // then
-        Collection<Product> products = commonRepository.loadProduct();
+        Collection<Product> products = commonRepository.loadProductFromDatabase();
         Product modifyProduct = new ArrayList<>(products).get(0);
         Assertions.assertEquals("newBall", modifyProduct.getName());
         Assertions.assertEquals(300.0, modifyProduct.getPrice());
@@ -154,10 +154,10 @@ public class AdministratorRepositoryTest {
         customerRepository.saveOrderToDatabase(order);
 
         // when
-        administratorRepository.updateOrderStatus(order.getIdOrder(), Status.SENT);
+        administratorRepository.updateOrderStatusInDatabase(order.getIdOrder(), Status.SENT);
 
         // then
-        Collection<Order> orders = administratorRepository.loadOrders();
+        Collection<Order> orders = administratorRepository.loadOrdersFromDatabase();
         Order updateStatus = new ArrayList<>(orders).get(0);
         Assertions.assertEquals(Status.SENT, updateStatus.getStatus());
     }

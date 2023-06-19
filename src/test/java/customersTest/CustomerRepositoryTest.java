@@ -76,7 +76,7 @@ public class CustomerRepositoryTest {
         customerRepository.saveOrderToDatabase(order);
 
         //then
-        Collection<Order> orders = administratorRepository.loadOrders();
+        Collection<Order> orders = administratorRepository.loadOrdersFromDatabase();
         Assertions.assertEquals(1, orders.size());
         Assertions.assertTrue(orders.contains(order));
     }
@@ -92,7 +92,7 @@ public class CustomerRepositoryTest {
         customerRepository.updateProductQuantityInDatabase(product.getId_product(), 20);
 
         //then
-        Collection<Product> products = commonRepository.loadProduct();
+        Collection<Product> products = commonRepository.loadProductFromDatabase();
         Product updateProductQuantity = new ArrayList<>(products).get(0);
         Assertions.assertEquals(20, updateProductQuantity.getQuantity());
     }
@@ -168,10 +168,10 @@ public class CustomerRepositoryTest {
         customerRepository.saveOrderToDatabase(order1);
 
         //when
-        customerRepository.loadOrders(order1.getIdCustomer());
+        customerRepository.loadOrderFromDatabase(order1.getIdCustomer());
 
         //then
-        Collection<Order> loadedOrders = customerRepository.loadOrders(1);
+        Collection<Order> loadedOrders = customerRepository.loadOrderFromDatabase(1);
         Assertions.assertEquals(2, loadedOrders.size());
         Assertions.assertTrue(loadedOrders.contains(order));
         Assertions.assertTrue(loadedOrders.contains(order1));

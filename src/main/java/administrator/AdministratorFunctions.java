@@ -189,7 +189,7 @@ public class AdministratorFunctions {
                             int idCategory = scanner.nextInt();
                             scanner.nextLine();
                             if (categoryExists(idCategory)) {
-                                administratorRepository.modifyProductsColumn(idProduct, name, price, quantity, idCategory);
+                                administratorRepository.modifyProductsColumnInDatabase(idProduct, name, price, quantity, idCategory);
                                 correctCategory = true;
                             } else {
                                 System.out.println("Category does not exist");
@@ -221,7 +221,7 @@ public class AdministratorFunctions {
                         }
                         int idOrders = scanner.nextInt();
                         scanner.nextLine();
-                        administratorRepository.updateOrderStatus(idOrders, Status.SENT);
+                        administratorRepository.updateOrderStatusInDatabase(idOrders, Status.SENT);
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -233,7 +233,7 @@ public class AdministratorFunctions {
     }
 
     public void displayOrders() {
-        Collection<Order> orders = administratorRepository.loadOrders();
+        Collection<Order> orders = administratorRepository.loadOrdersFromDatabase();
         for (Order order : orders) {
             System.out.println(order.toStringForAdministrator());
         }
@@ -242,7 +242,7 @@ public class AdministratorFunctions {
     public void displayCustomers() {
         Collection<Customer> customers = commonRepository.loadCustomersFromDatabase();
         for (Customer customer : customers) {
-            System.out.println(customer);
+            System.out.println(customer.toStringForAdministrator());
         }
     }
 
@@ -266,7 +266,7 @@ public class AdministratorFunctions {
     }
 
     private boolean ordersExists() {
-        Collection<Order> orders = administratorRepository.loadOrders();
+        Collection<Order> orders = administratorRepository.loadOrdersFromDatabase();
         if (orders.isEmpty()) {
             System.out.println("There are no orders");
             return false;

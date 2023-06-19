@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import products.Category;
 import products.Order;
 import products.Product;
 import products.Status;
@@ -88,11 +89,13 @@ public class CustomerFunctionsTest {
     void shouldAddProductToBasketTest() {
 
         //given
-        Product product = new Product(1, "testName", 100.0, 10, 1, Status.AVAILABLE);
+        Category category = new Category(1,"test");
+        administratorRepository.saveCategoryToDatabase(category);
+        Product product = new Product(1, "testName", 100.0, 100,1, Status.AVAILABLE);
         administratorRepository.saveProduct(product);
 
         //when
-        String input = "1\n10\nyes\n";
+        String input = "yes\n1\n10\nno\n";
         ByteArrayInputStream inputStream = new ByteArrayInputStream(input.getBytes());
         System.setIn(inputStream);
         customerFunctions.addProductToBasket();
@@ -101,6 +104,7 @@ public class CustomerFunctionsTest {
         Collection<Basket> basket = customerRepository.loadBasketFromDatabase();
         Assertions.assertEquals(1, basket.size());
     }
+
 
     @Test
     void shouldDisplayProductInBasketTest() {
@@ -125,18 +129,23 @@ public class CustomerFunctionsTest {
     void shouldRemoveProductFromBasket() {
 
         //given
+        Product product = new Product(1,"product",100.0,100,1,Status.AVAILABLE);
+        administratorRepository.saveProduct(product);
         Basket basketProduct = new Basket(1, 1, "product", 100.0, 10);
         customerRepository.saveProductToBasketDatabase(basketProduct);
 
         //when
+
         String input = "yes\n1\n10\nno\n";
         ByteArrayInputStream inputStream = new ByteArrayInputStream(input.getBytes());
         System.setIn(inputStream);
+
         customerFunctions.removeProductFromBasket();
 
         //then
         Collection<Basket> basket = customerRepository.loadBasketFromDatabase();
         Assertions.assertTrue(basket.isEmpty());
+
     }
 
     @Test
@@ -157,7 +166,7 @@ public class CustomerFunctionsTest {
         customerFunctions.submitOrder();
 
         //then
-        Collection<Order> orders = administratorRepository.loadOrders();
+        Collection<Order> orders = administratorRepository.loadOrdersFromDatabase();
         Assertions.assertEquals(1, orders.size());
         Order order = orders.iterator().next();
         Assertions.assertEquals(1, order.getIdOrder());

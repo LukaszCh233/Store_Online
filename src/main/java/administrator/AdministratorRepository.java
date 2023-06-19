@@ -60,7 +60,7 @@ public class AdministratorRepository {
     }
 
 
-    public Collection<Order> loadOrders() {
+    public Collection<Order> loadOrdersFromDatabase() {
         Collection<Order> orders = new ArrayList<>();
         String sql = " SELECT * FROM Orders";
         try (Statement statement = database.getConnection().createStatement()) {
@@ -95,7 +95,7 @@ public class AdministratorRepository {
         }
     }
 
-    public void modifyProductsColumn(int id, String name, double price, int quantity, int id_category) {
+    public void modifyProductsColumnInDatabase(int id, String name, double price, int quantity, int id_category) {
         String sql = "UPDATE Products SET name = ?, price = ?, quantity = ?, id_category = ? WHERE id_product = ?";
         try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
             preparedStatement.setString(1, name);
@@ -109,7 +109,7 @@ public class AdministratorRepository {
         }
     }
 
-    public void updateOrderStatus(int idOrder, Status status) {
+    public void updateOrderStatusInDatabase(int idOrder, Status status) {
         String sql = "UPDATE Orders SET status = ? WHERE id_order = ?";
         try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
             preparedStatement.setString(1, status.name());

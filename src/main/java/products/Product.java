@@ -16,7 +16,6 @@ public class Product {
     int selectedQuantity;
     Status status;
 
-
     public Product(Integer id_product, String name, Double price, int quantity, Integer id_category, Status status) {
         this.id_product = id_product;
         this.name = name;
@@ -24,7 +23,6 @@ public class Product {
         this.quantity = quantity;
         this.id_category = id_category;
         this.status = status;
-
     }
 
     @Override

@@ -97,7 +97,7 @@ public class AdministratorFunctionTest {
         administratorFunctions.addProductToStore();
 
         //then
-        Collection<Product> products = commonRepository.loadProduct();
+        Collection<Product> products = commonRepository.loadProductFromDatabase();
         Product foundProduct = new ArrayList<>(products).get(0);
         Assertions.assertEquals(1, products.size());
         Assertions.assertTrue(products.contains(foundProduct));
@@ -121,7 +121,7 @@ public class AdministratorFunctionTest {
         administratorFunctions.deleteProductFromStore();
 
         //then
-        Collection<Product> products = commonRepository.loadProduct();
+        Collection<Product> products = commonRepository.loadProductFromDatabase();
         Assertions.assertTrue(products.isEmpty());
     }
 
@@ -141,7 +141,7 @@ public class AdministratorFunctionTest {
         administratorFunctions.modifyProductData();
 
         //then
-        Collection<Product> products = commonRepository.loadProduct();
+        Collection<Product> products = commonRepository.loadProductFromDatabase();
         Product foundProduct = new ArrayList<>(products).get(0);
         Assertions.assertEquals("newName", foundProduct.getName());
         Assertions.assertEquals(200, foundProduct.getPrice());
@@ -164,7 +164,7 @@ public class AdministratorFunctionTest {
         administratorFunctions.sendOrder();
 
         //then
-        Collection<Order> orders = administratorRepository.loadOrders();
+        Collection<Order> orders = administratorRepository.loadOrdersFromDatabase();
         Order sendOrder = new ArrayList<>(orders).get(0);
         Assertions.assertEquals(Status.SENT, sendOrder.getStatus());
     }
@@ -183,7 +183,7 @@ public class AdministratorFunctionTest {
         administratorFunctions.displayOrders();
 
         //then
-        Collection<Order> orders = administratorRepository.loadOrders();
+        Collection<Order> orders = administratorRepository.loadOrdersFromDatabase();
         Assertions.assertEquals(2, orders.size());
         Assertions.assertTrue(orders.contains(order));
         Assertions.assertTrue(orders.contains(order1));

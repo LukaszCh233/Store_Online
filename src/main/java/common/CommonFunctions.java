@@ -20,32 +20,38 @@ public class CommonFunctions {
 
     public void displayCategoryProductsInStore() {
         Scanner scanner = new Scanner(System.in);
-        int choiceCategory;
 
         boolean bad_choice = false;
         while (!bad_choice) {
-            displayCategories();
-            while (!scanner.hasNextInt()) {
-                System.out.println("Give a number");
-                scanner.next();
-            }
-            choiceCategory = scanner.nextInt();
-            Collection<Product> productsInCategory = commonRepository.loadSelectedCategoryProduct(choiceCategory);
-            if (!categoryExist(choiceCategory)) {
-                System.out.println("there is no such category");
-                continue;
-            }
-            if (productsInCategory.isEmpty()) {
-                System.out.println("There are no products");
-                continue;
-            } else {
-                System.out.println("Category products:");
-                for (Product product : productsInCategory) {
-                    if (product.getQuantity() == 0) {
-                        product.setStatus(Status.LACK);
-                    }
-                    System.out.println(product);
+            try {
+                displayCategories();
+                while (!scanner.hasNextInt()) {
+                    System.out.println("Give a number");
+                    scanner.next();
                 }
+                int choiceCategory = scanner.nextInt();
+
+
+                Collection<Product> productsInCategory = commonRepository.loadSelectedCategoryProduct(choiceCategory);
+                if (!categoryExist(choiceCategory)) {
+                    System.out.println("there is no such category");
+                    continue;
+                }
+                if (productsInCategory.isEmpty()) {
+                    System.out.println("There are no products");
+                    continue;
+                } else {
+                    System.out.println("Category products:");
+                    for (Product product : productsInCategory) {
+                        if (product.getQuantity() == 0) {
+                            product.setStatus(Status.LACK);
+                        }
+                        System.out.println(product);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
             }
             bad_choice = true;
         }
@@ -70,7 +76,7 @@ public class CommonFunctions {
     }
 
     public void displayProductsInStore() {
-        Collection<Product> products = commonRepository.loadProduct();
+        Collection<Product> products = commonRepository.loadProductFromDatabase();
         System.out.println("Products in store");
         for (Product product : products) {
             if (product.getQuantity() == 0) {
@@ -81,7 +87,7 @@ public class CommonFunctions {
     }
 
     public boolean productExists(int idProduct) {
-        Collection<Product> products = commonRepository.loadProduct();
+        Collection<Product> products = commonRepository.loadProductFromDatabase();
         for (Product product : products) {
             if (product.getId_product() == idProduct) {
                 return true;
