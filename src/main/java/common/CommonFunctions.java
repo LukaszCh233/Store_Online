@@ -5,7 +5,6 @@ import database.Database;
 import products.Category;
 import products.Product;
 import products.Status;
-
 import java.util.Collection;
 import java.util.Scanner;
 

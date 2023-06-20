@@ -8,7 +8,6 @@ import products.Category;
 import products.Order;
 import products.Product;
 import products.Status;
-
 import java.util.Collection;
 import java.util.Scanner;
 
@@ -71,6 +70,7 @@ public class AdministratorFunctions {
     public void addProductToStore() {
         Scanner scanner = new Scanner(System.in);
         String choice;
+
         if (!categoriesExists()) {
             return;
         }

@@ -20,13 +20,12 @@ public class CustomerFunctions {
         this.customerRepository = new CustomerRepository(database);
         this.commonRepository = new CommonRepository(database);
         this.commonFunctions = new CommonFunctions(database);
-
     }
 
     public void registerCustomer() {
-
         Scanner scanner = new Scanner(System.in);
         String choice;
+
         do {
             try {
                 System.out.println("Name:");
@@ -66,7 +65,6 @@ public class CustomerFunctions {
     }
 
     public void loginCustomer() {
-
         Scanner scanner = new Scanner(System.in);
         boolean loginSuccessful = false;
 
@@ -92,7 +90,6 @@ public class CustomerFunctions {
     }
 
     public void addProductToBasket() {
-
         Scanner scanner = new Scanner(System.in);
         String choice;
 
@@ -352,7 +349,6 @@ public class CustomerFunctions {
     }
 
     public void displayOrdersHistory(String loggedEmail) {
-
         int customerId = customerRepository.getCustomerIdByEmail(loggedEmail);
         if (customerId != -1) {
             Order loggedCustomer = getOrdersById(customerId);

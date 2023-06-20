@@ -3,7 +3,6 @@ package interfaceStore;
 import administrator.AdministratorFunctions;
 import common.CommonFunctions;
 import customers.CustomerFunctions;
-import customers.CustomerRepository;
 import database.Database;
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -12,14 +11,12 @@ public class StoreMenu implements AutoCloseable {
     Database database;
     AdministratorFunctions administratorFunctions;
     CustomerFunctions customerFunctions;
-    CustomerRepository customerRepository;
     CommonFunctions commonFunctions;
 
     public StoreMenu() throws SQLException {
         database = new Database();
         administratorFunctions = new AdministratorFunctions(database);
         customerFunctions = new CustomerFunctions(database);
-        customerRepository = new CustomerRepository(database);
         commonFunctions = new CommonFunctions(database);
     }
 
@@ -43,6 +40,7 @@ public class StoreMenu implements AutoCloseable {
         Scanner scanner = new Scanner(System.in);
         int choice;
         boolean correct = false;
+
         while (!correct) {
             System.out.println("Login - 1\nRegister - 2");
             while (!scanner.hasNextInt()) {
@@ -62,20 +60,19 @@ public class StoreMenu implements AutoCloseable {
     }
 
     public void administratorInterface() {
-
         Scanner scanner = new Scanner(System.in);
         String choice;
 
         do {
             System.out.println("1: Add product to store");
             System.out.println("2: Delete product from store");
-            System.out.println("3: Products in store");
+            System.out.println("3: Products from selected category");
             System.out.println("4: Modify product in store");
             System.out.println("5: Orders");
             System.out.println("6: Customers");
             System.out.println("7: Create category");
             System.out.println("8: Categories");
-            System.out.println("9: Products from selected category");
+            System.out.println("9: Products in store");
             System.out.println("10: Delete category");
             System.out.println("11: Order management");
             System.out.println("0: Close program");
@@ -102,6 +99,7 @@ public class StoreMenu implements AutoCloseable {
     public void customerInterface() {
         Scanner scanner = new Scanner(System.in);
         String choice;
+
         do {
             System.out.println("1: Add product to basket");
             System.out.println("2: Delete product from basket");

@@ -5,7 +5,6 @@ import products.Category;
 import products.Order;
 import products.Product;
 import products.Status;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,7 +58,6 @@ public class AdministratorRepository {
         }
     }
 
-
     public Collection<Order> loadOrdersFromDatabase() {
         Collection<Order> orders = new ArrayList<>();
         String sql = " SELECT * FROM Orders";
@@ -73,7 +71,6 @@ public class AdministratorRepository {
         }
         return orders;
     }
-
 
     public void removeProductFromDatabase(int id) {
         String sql = "DELETE FROM Products WHERE id_product = ?";
