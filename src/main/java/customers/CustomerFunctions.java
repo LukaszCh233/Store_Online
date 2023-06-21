@@ -106,7 +106,7 @@ public class CustomerFunctions {
                     }
                     int idProduct = scanner.nextInt();
                     scanner.nextLine();
-                    if (commonFunctions.productExists(idProduct)) {
+                    if (commonRepository.productExists(idProduct)) {
                         Product selectedProduct = getProductById(idProduct);
 
                         System.out.println("Quantity:");

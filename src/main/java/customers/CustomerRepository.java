@@ -75,19 +75,19 @@ public class CustomerRepository {
     public void saveCustomerToDatabase(Customer customer) {
         String sql = "INSERT INTO Customers (name,lastName,email,number,address) VALUES (?,?,?,?,?)";
         try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
-            preparedStatement.setString(1, customer.name);
-            preparedStatement.setString(2, customer.lastName);
-            preparedStatement.setString(3, customer.email);
-            preparedStatement.setInt(4, customer.number);
-            preparedStatement.setString(5, customer.address);
+            preparedStatement.setString(1, customer.getName());
+            preparedStatement.setString(2, customer.getLastName());
+            preparedStatement.setString(3, customer.getEmail());
+            preparedStatement.setInt(4, customer.getNumber());
+            preparedStatement.setString(5, customer.getAddress());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
         String sql1 = "INSERT INTO Customers_password (password, email) VALUES (?, ?)";
         try (PreparedStatement statement = database.getConnection().prepareStatement(sql1)) {
-            statement.setString(1, customer.password);
-            statement.setString(2, customer.email);
+            statement.setString(1, customer.getPassword());
+            statement.setString(2, customer.getEmail());
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

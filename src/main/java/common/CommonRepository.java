@@ -5,10 +5,8 @@ import database.Database;
 import products.Category;
 import products.Product;
 import products.Status;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -67,7 +65,7 @@ public class CommonRepository {
         return categories;
     }
 
-    public Collection<Customer> loadCustomersFromDatabase() {
+            public Collection<Customer> loadCustomersFromDatabase() {
         Collection<Customer> customers = new ArrayList<>();
         String sql = "SELECT * FROM Customers c JOIN Customers_password cp ON c.id_customer = cp.customer_id";
         try (Statement statement = database.getConnection().createStatement()) {
@@ -108,5 +106,27 @@ public class CommonRepository {
             e.printStackTrace();
         }
         return products;
+    }
+    public boolean categoryExists(int id_category) {
+        String sql = "SELECT id_category FROM categories WHERE id_category = ? LIMIT 1";
+        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
+            preparedStatement.setInt(1,id_category);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    public boolean productExists(int idProduct) {
+        String sql = "SELECT id_product FROM Products WHERE id_product = ? LIMIT 1 ";
+        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(sql)) {
+            preparedStatement.setInt(1,idProduct);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return  resultSet.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

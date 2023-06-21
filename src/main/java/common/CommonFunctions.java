@@ -32,7 +32,7 @@ public class CommonFunctions {
 
 
                 Collection<Product> productsInCategory = commonRepository.loadSelectedCategoryProduct(choiceCategory);
-                if (!categoryExist(choiceCategory)) {
+                if (!commonRepository.categoryExists(choiceCategory)) {
                     System.out.println("there is no such category");
                     continue;
                 }
@@ -56,16 +56,6 @@ public class CommonFunctions {
         }
     }
 
-    private boolean categoryExist(int idCategory) {
-        Collection<Category> categories = commonRepository.loadCategoriesFromDatabase();
-        for (Category category : categories) {
-            if (category.getId_category() == idCategory) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public void displayCategories() {
         Collection<Category> categories = commonRepository.loadCategoriesFromDatabase();
         System.out.println("Categories:");
@@ -83,15 +73,5 @@ public class CommonFunctions {
             }
             System.out.println(product);
         }
-    }
-
-    public boolean productExists(int idProduct) {
-        Collection<Product> products = commonRepository.loadProductFromDatabase();
-        for (Product product : products) {
-            if (product.getId_product() == idProduct) {
-                return true;
-            }
-        }
-        return false;
     }
 }

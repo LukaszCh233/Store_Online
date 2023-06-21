@@ -102,7 +102,7 @@ public class AdministratorFunctions {
                     }
                     int id_category = scanner.nextInt();
                     scanner.nextLine();
-                    if (categoryExists(id_category)) {
+                    if (commonRepository.categoryExists(id_category)) {
                         Product product = new Product(null, name, price, quantity, id_category, Status.AVAILABLE);
                         administratorRepository.saveProduct(product);
                         correctCategory = true;
@@ -160,7 +160,7 @@ public class AdministratorFunctions {
                     }
                     int idProduct = scanner.nextInt();
                     scanner.nextLine();
-                    if (commonFunctions.productExists(idProduct)) {
+                    if (commonRepository.productExists(idProduct)) {
                         System.out.println("Enter the new name:");
                         String name = scanner.nextLine();
 
@@ -188,7 +188,7 @@ public class AdministratorFunctions {
                             }
                             int idCategory = scanner.nextInt();
                             scanner.nextLine();
-                            if (categoryExists(idCategory)) {
+                            if (commonRepository.categoryExists(idCategory)) {
                                 administratorRepository.modifyProductsColumnInDatabase(idProduct, name, price, quantity, idCategory);
                                 correctCategory = true;
                             } else {
@@ -244,16 +244,6 @@ public class AdministratorFunctions {
         for (Customer customer : customers) {
             System.out.println(customer.toStringForAdministrator());
         }
-    }
-
-    private boolean categoryExists(int id_category) {
-        Collection<Category> categories = commonRepository.loadCategoriesFromDatabase();
-        for (Category category : categories) {
-            if (category.getId_category() == id_category) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean categoriesExists() {
