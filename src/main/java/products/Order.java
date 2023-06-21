@@ -9,11 +9,11 @@ import java.util.Objects;
 @Getter
 @Setter
 public class Order {
-    Integer idOrder;
-    Integer idCustomer;
-    LocalDate orderData;
-    Double price;
-    Status status;
+    private Integer idOrder;
+    private Integer idCustomer;
+    private LocalDate orderData;
+    private Double price;
+    private Status status;
 
     public Order(Integer idOrder, Integer idCustomer, LocalDate orderData, Double price, Status status) {
         this.idOrder = idOrder;

@@ -8,13 +8,13 @@ import java.util.Objects;
 @Getter
 @Setter
 public class Product {
-    Integer id_product;
-    String name;
-    Double price;
-    int quantity;
-    Integer id_category;
-    int selectedQuantity;
-    Status status;
+    private Integer id_product;
+    private String name;
+    private Double price;
+    private int quantity;
+    private Integer id_category;
+    private int selectedQuantity;
+    private Status status;
 
     public Product(Integer id_product, String name, Double price, int quantity, Integer id_category, Status status) {
         this.id_product = id_product;

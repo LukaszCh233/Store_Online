@@ -8,13 +8,13 @@ import java.util.Objects;
 @Getter
 @Setter
 public class Customer {
-    Integer id_customer;
-    String name;
-    String lastName;
-    String email;
-    Integer number;
-    String address;
-    String password;
+   private Integer id_customer;
+    private String name;
+    private String lastName;
+    private String email;
+    private Integer number;
+    private String address;
+    private String password;
 
     public Customer(Integer id_customer, String name, String lastName, String email, Integer number, String address, String password) {
         this.id_customer = id_customer;

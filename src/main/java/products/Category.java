@@ -6,8 +6,8 @@ import java.util.Objects;
 @Getter
 @Setter
 public class Category {
-    Integer id_category;
-    String category;
+    private Integer id_category;
+    private String category;
 
     public Category(Integer id_category, String category) {
         this.id_category = id_category;

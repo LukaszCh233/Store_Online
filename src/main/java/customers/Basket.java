@@ -8,11 +8,11 @@ import java.util.Objects;
 @Getter
 @Setter
 public class Basket {
-    Integer id_basket;
-    Integer id_product;
-    String name;
-    Double price;
-    int quantity;
+    private Integer id_basket;
+    private Integer id_product;
+    private String name;
+    private Double price;
+    private int quantity;
 
 
     public Basket(Integer id_basket, Integer id_product, String name, Double price, int quantity) {
